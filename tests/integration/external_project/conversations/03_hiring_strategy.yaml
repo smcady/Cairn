@@ -1,0 +1,53 @@
+id: hiring_strategy
+description: >
+  Four-turn discussion about first sales hire timing. Explores founder-led
+  sales vs early hire, surfaces ICP dependency, and resolves with a sequenced
+  approach. Tests multi-turn reasoning with question resolution.
+domain: product_strategy
+
+turns:
+  - user: >
+      We're at $500K ARR and I'm doing all the sales myself. I think it's
+      time to hire our first sales rep so I can focus on product.
+    assistant: >
+      At $500K ARR founder-led sales is still viable, but the question is
+      whether you've found a repeatable sales motion. If you hire before
+      the playbook exists, the rep will flounder.
+
+  - user: >
+      That's a good point. I don't have a documented playbook but I have
+      a sense for what works. The problem is I can't scale myself — I'm
+      spending 60% of my time on sales calls instead of product.
+    assistant: >
+      The 60% time split is unsustainable. But "a sense for what works"
+      isn't transferable. You need at least a basic ICP definition and
+      a documented close process before a rep can succeed.
+
+  - user: >
+      OK so what if I hire someone who can help me BUILD the playbook,
+      not just execute one? More of a sales-oriented cofounder type
+      than a quota-carrying rep.
+    assistant: >
+      That reframes the hire entirely. You're not looking for someone to
+      run a playbook — you're looking for someone to co-create one. That's
+      a fundamentally different profile: high agency, comfortable with
+      ambiguity, probably has startup experience.
+
+  - user: >
+      Yes exactly. And once we have the playbook documented together,
+      THEN we hire quota-carrying reps to execute it. Two-phase approach.
+    assistant: >
+      The two-phase approach is sound. Phase 1: hire a sales leader who
+      co-creates the playbook with you. Phase 2: hire execution reps
+      once the playbook is proven. This de-risks the scaling step.
+
+assertions:
+  min_nodes: 4
+  search_queries:
+    - query: "sales hire timing"
+      min_results: 1
+    - query: "sales playbook"
+      min_results: 1
+  orient_topics:
+    - topic: "hiring first sales rep"
+      must_not_be_empty: true

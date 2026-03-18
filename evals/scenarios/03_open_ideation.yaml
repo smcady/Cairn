@@ -1,0 +1,83 @@
+scenario_id: open_ideation_01
+description: "Founder free-associating on a new product concept. Heavy NEW_PROPOSITION and TERRITORY_IDENTIFIED."
+domain: ideation
+difficulty: easy
+
+turns:
+  - text: >
+      What if there was a way to capture the structure of your thinking — not just
+      notes, but the actual reasoning: what you believe, what is contested, what is
+      still open — and have that available to any AI you work with across sessions
+      and tools?
+    source: user
+
+  - text: >
+      The gap is not memory of facts. I can write things down. The gap is memory of
+      reasoning state — what was decided and why, what was rejected and why, what
+      remains genuinely open and unresolved. Those are completely different things.
+    source: user
+
+  - text: >
+      Every existing tool stores text. None of them understand the difference between
+      we discussed X and we decided X. That distinction is the whole value — knowing
+      not just what was said but what the status of that idea is.
+    source: user
+
+  - text: >
+      There is a space here for something like a personal reasoning graph — nodes for
+      propositions, tensions, open questions, decisions. Typed edges that capture the
+      structure of the relationships. Confidence scores that reflect how settled each
+      idea is.
+    source: user
+
+  - text: >
+      The distribution question is interesting. If it lives as a separate application,
+      nobody uses it. It has to go where the user already works — inside Claude, inside
+      Cursor, invisible infrastructure underneath their existing tools, not a competing
+      product they have to switch to.
+    source: user
+
+  - text: >
+      I keep coming back to the question of what the right ontology is. Are propositions
+      and contradictions the right primitives? Or is this better modeled as claims and
+      evidence? The ontology shapes everything downstream.
+    source: user
+
+  - text: >
+      There is probably a whole territory around organizational memory — not just
+      individual reasoning but team reasoning. Decisions that get made and then
+      relitigated three months later because nobody has the full context of why
+      the original decision was made.
+    source: user
+
+expectations:
+  event_types:
+    - type: NEW_PROPOSITION
+      at_least: 3
+    - type: NEW_QUESTION
+      at_least: 1
+
+  recall_queries:
+    - query: "difference between discussed and decided"
+      must_contain_keywords: ["decided", "discussed", "status"]
+      top_k: 3
+
+    - query: "reasoning graph typed nodes propositions tensions"
+      must_contain_keywords: ["reasoning", "proposition", "graph", "node"]
+      top_k: 3
+
+    - query: "distribution inside existing tools invisible infrastructure"
+      must_contain_keywords: ["distribution", "invisible", "Claude", "Cursor"]
+      top_k: 3
+
+    - query: "team organizational memory relitigated decisions"
+      must_contain_keywords: ["organizational", "team", "decisions"]
+      top_k: 3
+
+  render_must_mention:
+    - "reasoning"
+    - "decision"
+
+  quality_gates:
+    max_drop_rate: 0.35
+    min_nodes: 4

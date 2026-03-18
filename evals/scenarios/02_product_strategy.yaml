@@ -1,0 +1,86 @@
+scenario_id: product_strategy_01
+description: "Founder and PM debate enterprise-first vs. PLG, ending with explicit decision to defer PLG."
+domain: product_strategy
+difficulty: medium
+
+turns:
+  - text: >
+      We should go enterprise-first. Our ACV is already at forty thousand dollars
+      without trying, and enterprise deals give us the runway to build the product
+      right without chasing growth at all costs. The signal is there — we should
+      follow it.
+    source: user
+
+  - text: >
+      I'd push back on that. Enterprise sales cycles are nine to twelve months, and
+      we'd be burning runway waiting for signatures while our competitors iterate
+      freely. Product-led growth lets us compress the learning loop and get real
+      usage data much faster.
+    source: user
+
+  - text: >
+      The bottleneck isn't the sales cycle length — it's finding design partners who
+      will actually shape the product before we waste engineering on the wrong thing.
+      Enterprise buyers are more willing to commit to that kind of engagement than
+      individual PLG users who churn after a free trial.
+    source: user
+
+  - text: >
+      Agreed on design partners being valuable. But we need to be honest about the
+      difference between design partner relationships and actual revenue. Can we
+      survive twelve months of design partnerships without meaningful ARR? That's
+      the question we haven't answered.
+    source: user
+
+  - text: >
+      What if we run both tracks in parallel — a handful of enterprise design partners
+      for learning, and a self-serve tier for early adopters who discover us organically?
+      The risk is splitting focus and executing neither well.
+    source: user
+
+  - text: >
+      We should drop the PLG thread for now. We don't have the product surface for
+      it — our onboarding still requires a forty-five minute call. Come back to
+      self-serve in Q3 when that flow is actually ready. Trying to do both now
+      just means doing both badly.
+    source: user
+
+  - text: >
+      Agreed. Enterprise-first for the next two quarters, with an explicit commitment
+      to revisit PLG in Q3. The self-serve flow needs to be a prerequisite before
+      we invest in that motion. Decision made.
+    source: user
+
+expectations:
+  event_types:
+    - type: NEW_PROPOSITION
+      at_least: 2
+    - type: CONTRADICTION
+      at_least: 1
+    - type: NEW_QUESTION
+      at_least: 1
+
+  recall_queries:
+    - query: "enterprise sales cycle length and runway concerns"
+      must_contain_keywords: ["enterprise", "runway", "cycle"]
+      top_k: 3
+
+    - query: "product-led growth self-serve approach"
+      must_contain_keywords: ["PLG", "self-serve", "product-led"]
+      top_k: 3
+
+    - query: "design partners for product learning vs real revenue"
+      must_contain_keywords: ["design partner", "revenue", "ARR"]
+      top_k: 3
+
+    - query: "deferring PLG to Q3 when onboarding is ready"
+      must_contain_keywords: ["Q3", "self-serve", "onboarding"]
+      top_k: 3
+
+  render_must_mention:
+    - "enterprise"
+    - "PLG"
+
+  quality_gates:
+    max_drop_rate: 0.40
+    min_nodes: 3

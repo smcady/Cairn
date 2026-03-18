@@ -1,0 +1,86 @@
+scenario_id: multi_reference_01
+description: "Three distinct technical problems set up early; later turns cross-reference them. Stresses resolver accuracy."
+domain: technical_architecture
+difficulty: hard
+
+turns:
+  - text: >
+      Our authentication system is a mess — it was bolted on post-launch and now
+      every new feature has to thread through it carefully. The coupling is
+      everywhere. It is slowing down every engineer who touches any part of the
+      system that requires permissions.
+    source: user
+
+  - text: >
+      The payment integration is similarly fragile. We have four different places
+      in the codebase that know about payment state and they do not stay in sync.
+      Last week we had a bug where a user was charged but their account was not
+      upgraded because two of those four places disagreed on the transaction status.
+    source: user
+
+  - text: >
+      We are also carrying a real data model problem. Our core entity was designed
+      for individual B2C users and now we are trying to force B2B multi-tenant
+      behavior onto it. Every new enterprise feature requires working around the
+      original assumptions, and it gets harder each time.
+    source: user
+
+  - text: >
+      The authentication coupling and the data model problem are actually connected.
+      The auth system checks permissions against the B2C entity model, and that is
+      exactly why adding organization-level roles is so painful. Fixing the data
+      model would also unblock the auth cleanup.
+    source: user
+
+  - text: >
+      I agree the auth issues are real but I would push back that they are as
+      urgent as the payment fragmentation. If payment state goes out of sync we
+      have actual money errors and customer chargebacks. The auth debt is real
+      but the consequence is internal developer pain, not customer-facing harm.
+    source: user
+
+  - text: >
+      That settles the payment question — fix payments first. The blast radius of
+      a payment bug is a customer crisis with potential legal implications. The
+      auth debt is serious but the consequence is slower engineering, not broken
+      trust with customers. Payments in Q1, auth in Q2.
+    source: user
+
+  - text: >
+      For the data model, we should at minimum document the B2C assumptions
+      explicitly so new engineers understand what they are stepping into. We
+      cannot fix it in the next quarter but we can stop making it worse by
+      adding more code that assumes single-user context.
+    source: user
+
+expectations:
+  event_types:
+    - type: NEW_PROPOSITION
+      at_least: 2
+    - type: CONTRADICTION
+      at_least: 1
+
+  recall_queries:
+    - query: "authentication system coupling permissions everywhere"
+      must_contain_keywords: ["auth", "coupling", "permissions"]
+      top_k: 3
+
+    - query: "payment state fragmentation across codebase sync issues"
+      must_contain_keywords: ["payment", "sync", "state"]
+      top_k: 3
+
+    - query: "B2B multi-tenant data model built for B2C users"
+      must_contain_keywords: ["B2B", "multi-tenant", "entity"]
+      top_k: 3
+
+    - query: "fix payments before auth because customer blast radius"
+      must_contain_keywords: ["payment", "blast", "priority"]
+      top_k: 3
+
+  render_must_mention:
+    - "auth"
+    - "payment"
+
+  quality_gates:
+    max_drop_rate: 0.55
+    min_nodes: 3

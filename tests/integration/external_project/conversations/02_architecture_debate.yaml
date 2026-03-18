@@ -1,0 +1,48 @@
+id: architecture_debate
+description: >
+  Three-turn microservices vs monolith debate. Starts with microservices advocacy,
+  gets challenged on operational overhead, lands on modular monolith as pragmatic
+  middle ground. Tests tension identification and synthesis.
+domain: technical_architecture
+
+turns:
+  - user: >
+      I want to build with microservices from day one. Each service owns
+      its domain, teams can deploy independently, and we avoid the Big Ball
+      of Mud that every monolith eventually becomes.
+    assistant: >
+      Microservices do offer strong domain isolation and independent
+      deployment. But starting with them on a small team can front-load
+      a lot of operational complexity before you need it.
+
+  - user: >
+      You're right that we're only 4 engineers. The observability stack
+      alone — tracing, log aggregation, service mesh — would eat a full
+      quarter. And we'd be debugging distributed systems instead of
+      building product.
+    assistant: >
+      That's a common trap. The operational overhead of microservices
+      is often underestimated. With 4 engineers, you'd spend more time
+      on infrastructure than product delivery.
+
+  - user: >
+      What if we go modular monolith? Enforce module boundaries at the
+      code level, run as one deployable unit, and extract services later
+      only when a specific module needs independent scaling.
+    assistant: >
+      A modular monolith gives you clean boundaries without distributed
+      systems complexity. You get the organizational benefits of domain
+      separation while keeping operational simplicity. Extract when you
+      have evidence, not speculation.
+
+assertions:
+  min_nodes: 3
+  has_superseded: true
+  search_queries:
+    - query: "microservices architecture"
+      min_results: 1
+    - query: "operational overhead"
+      min_results: 1
+  orient_topics:
+    - topic: "system architecture"
+      must_not_be_empty: true

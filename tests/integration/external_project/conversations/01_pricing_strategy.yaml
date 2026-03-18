@@ -1,0 +1,41 @@
+id: pricing_strategy
+description: >
+  Three-turn pricing model discussion. User starts with usage-based pricing,
+  hits enterprise pushback, resolves with two-track model. Tests contradiction
+  detection and synthesis supersession.
+domain: product_strategy
+
+turns:
+  - user: >
+      We need to decide on our pricing model. I think usage-based pricing
+      aligns incentives best — customers pay for what they use, we grow
+      revenue as they grow usage.
+    assistant: >
+      Usage-based pricing does align incentives well. It reduces friction
+      at the low end and scales revenue with customer value.
+
+  - user: >
+      I talked to enterprise prospects and they said procurement can't
+      budget for variable costs. Usage-based is a non-starter for enterprise.
+    assistant: >
+      That's a significant constraint. Enterprise procurement teams need
+      predictable annual costs for budget planning.
+
+  - user: >
+      Let's do a two-track model: seat-based for enterprise, usage-based
+      for self-serve. Best of both worlds.
+    assistant: >
+      A two-track pricing model addresses both segments — predictable
+      costs for enterprise procurement and low-friction scaling for self-serve.
+
+assertions:
+  min_nodes: 3
+  has_superseded: true
+  search_queries:
+    - query: "pricing model"
+      min_results: 1
+    - query: "enterprise procurement"
+      min_results: 1
+  orient_topics:
+    - topic: "pricing strategy"
+      must_not_be_empty: true

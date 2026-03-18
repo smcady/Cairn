@@ -1,0 +1,84 @@
+scenario_id: arch_debate_01
+description: "Two engineers debate microservices vs. modular monolith — contradiction, synthesis, open questions."
+domain: technical_architecture
+difficulty: medium
+
+turns:
+  - text: >
+      Microservices give each team full ownership of their service — you can deploy
+      independently without coordinating with other teams. That's the real advantage
+      and the reason so many organizations have moved this direction.
+    source: user
+
+  - text: >
+      The operational overhead is often underestimated though. You need service
+      discovery, distributed tracing, circuit breakers, and a service mesh just to
+      get basic observability. That's a massive infrastructure tax for a small team.
+    source: user
+
+  - text: >
+      We tried microservices with four engineers. We spent sixty percent of our time
+      on infrastructure instead of product. The cognitive load was brutal — context
+      switching between eight different services constantly, every bug requiring you
+      to trace through four services to find the root cause.
+    source: user
+
+  - text: >
+      Fair point on the overhead. But the counter-argument is that you don't feel the
+      monolith pain until it's genuinely severe — coordination overhead, deployments
+      that require everyone to freeze at once, one bad merge blocking the whole release.
+      The monolith feels fine until it suddenly doesn't.
+    source: user
+
+  - text: >
+      The right answer probably depends on team size and domain complexity. A modular
+      monolith with clean domain boundaries gives you most of the maintainability
+      benefits of microservices without the distributed systems tax. That's probably
+      the right default for teams under twenty engineers.
+    source: user
+
+  - text: >
+      At what point does a monolith become so painful that the microservices overhead
+      is worth it? Is there a team-size threshold or a codebase-complexity threshold
+      where the calculus actually flips?
+    source: user
+
+  - text: >
+      How do you handle cross-service transactions without distributed sagas becoming
+      unmaintainable? That's the part nobody talks about until it bites them in
+      production — eventual consistency is much harder to reason about than people expect.
+    source: user
+
+expectations:
+  event_types:
+    - type: NEW_PROPOSITION
+      at_least: 2
+    - type: CONTRADICTION
+      at_least: 1
+    - type: NEW_QUESTION
+      at_least: 1
+
+  recall_queries:
+    - query: "independent deployment without coordinating teams"
+      must_contain_keywords: ["independent", "deploy", "ownership"]
+      top_k: 3
+
+    - query: "operational overhead infrastructure cost of microservices"
+      must_contain_keywords: ["overhead", "infrastructure", "tracing", "mesh"]
+      top_k: 3
+
+    - query: "modular monolith as default for small teams"
+      must_contain_keywords: ["monolith", "domain", "boundaries"]
+      top_k: 3
+
+    - query: "cross-service transactions and eventual consistency"
+      must_contain_keywords: ["saga", "transaction", "consistency"]
+      top_k: 3
+
+  render_must_mention:
+    - "microservices"
+    - "monolith"
+
+  quality_gates:
+    max_drop_rate: 0.45
+    min_nodes: 3

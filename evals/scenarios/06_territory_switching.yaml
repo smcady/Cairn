@@ -1,0 +1,99 @@
+scenario_id: territory_switching_06
+description: "Founder conversation spanning two territories (hiring strategy → pricing model) with a cross-territory connection."
+domain: startup_strategy
+difficulty: medium
+
+turns:
+  - text: >
+      We're at $500K ARR and I'm debating whether to hire our first sales rep now or
+      keep doing founder-led sales for another six months. The worry is that a sales rep
+      without a clear playbook will just spin their wheels and cost us runway.
+    source: user
+
+  - text: >
+      Founder-led sales is the right default until you have a repeatable motion — you
+      need to know exactly what objections come up, what the close rate looks like, and
+      what the ICP actually is before you hand it off. Most founders hire too early and
+      end up managing a confused sales rep instead of closing deals themselves.
+    source: user
+
+  - text: >
+      The counter-argument is that a great sales rep will find the playbook themselves
+      if given enough time and leads. Some of the best early hires in SaaS have been
+      reps who came in without a playbook and built one. The risk is real but so is the
+      opportunity cost of the founder doing sales when they should be building product.
+    source: user
+
+  - text: >
+      What's the right quota expectation for a first sales rep at this stage? If we set
+      it too high they'll fail and leave, too low and we're subsidizing underperformance.
+      I've heard $300K-$500K ARR as a rough target but that feels like it depends heavily
+      on deal size and sales cycle length.
+    source: user
+
+  - text: >
+      Switching gears — we're also finalizing our pricing model. Right now we're
+      usage-based, charging per API call, but we're seeing enterprise customers ask for
+      seat-based pricing because their finance teams want predictable costs. The problem
+      is usage-based aligns our incentives with customer value, which feels right.
+    source: user
+
+  - text: >
+      The freemium risk with usage-based is that your best customers subsidize a long
+      tail of low-volume users who never convert. We've seen churn from customers who
+      felt surprised by variable bills — even when the bills were reasonable, the
+      unpredictability caused anxiety that hurt retention.
+    source: user
+
+  - text: >
+      Enterprise discounting is the other issue. Usage-based pricing is really hard to
+      discount cleanly — you end up with custom rate cards for every large customer and
+      your RevOps becomes a nightmare. Seat-based gives you a clean tier structure that
+      sales can work with without going to finance for every deal.
+    source: user
+
+  - text: >
+      Is there a hybrid model that works? Some companies do a base seat fee plus usage
+      overage. That gives finance the predictability they want while still aligning on
+      value for heavy users. The question is whether the added complexity is worth it.
+    source: user
+
+  - text: >
+      Actually the pricing decision directly affects when we need a sales hire. If we
+      go seat-based, we need a sales rep sooner because seat-based is a negotiation-heavy
+      motion — enterprise deals require someone who can handle procurement and legal.
+      Usage-based can stay self-serve longer, which means we can delay the sales hire
+      and keep founder-led sales for another two quarters.
+    source: user
+
+expectations:
+  event_types:
+    - type: NEW_PROPOSITION
+      at_least: 3
+    - type: NEW_QUESTION
+      at_least: 2
+    - type: TERRITORY_IDENTIFIED
+      at_least: 2
+    - type: CONNECTION
+      at_least: 1
+
+  recall_queries:
+    - query: "when to hire first sales rep founder-led sales"
+      must_contain_keywords: ["sales", "founder", "playbook"]
+      top_k: 3
+
+    - query: "usage-based vs seat-based pricing enterprise"
+      must_contain_keywords: ["usage", "seat", "pricing"]
+      top_k: 3
+
+    - query: "pricing model affects timing of sales hire"
+      must_contain_keywords: ["pricing", "sales", "seat"]
+      top_k: 3
+
+  render_must_mention:
+    - "sales"
+    - "pricing"
+
+  quality_gates:
+    max_drop_rate: 0.50
+    min_nodes: 4

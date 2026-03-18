@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "cairn": {
+      "command": "/path/to/cairn/.venv/bin/python",
+      "args": ["-m", "cairn.mcp_server"],
+      "cwd": "/path/to/cairn",
+      "env": {
+        "CAIRN_DB": "/path/to/cairn/cairn.db"
+      }
+    }
+  }
+}

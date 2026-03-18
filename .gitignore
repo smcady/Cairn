@@ -1,0 +1,17 @@
+.env.local
+.env
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+*.db
+*.db-shm
+*.db-wal
+*.log
+.DS_Store
+.claude/
+CLAUDE.md
+**/CLAUDE.md

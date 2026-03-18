@@ -1,0 +1,86 @@
+scenario_id: mixed_fact_reasoning_01
+description: "Factual context mixed with reasoning events. Tests correct classification of setup turns vs. reasoning turns."
+domain: mixed
+difficulty: medium
+
+turns:
+  - text: >
+      Quick context on where we are: twelve-person team, two million ARR, growing
+      about eight percent month over month. Series A is viable in eighteen months
+      if we hold this trajectory. The growth is real but we do not fully understand
+      what is driving it.
+    source: user
+
+  - text: >
+      Our biggest risk right now is not product — it is that our growth is almost
+      entirely word of mouth and we have no idea what is actually driving it.
+      We cannot optimize what we cannot measure, and right now we are flying blind
+      on the single most important lever in the business.
+    source: user
+
+  - text: >
+      We tried attribution once. We spent three weeks on UTM tagging and custom
+      analytics events and got data that was completely inconsistent with what
+      customers told us in interviews. Quantitative said one thing, qualitative
+      said another. We eventually gave up because we could not reconcile them.
+    source: user
+
+  - text: >
+      I think the right mental model is that attribution is a trailing indicator
+      — it tells you where your last customers came from, not where your next ones
+      will come from. The leading indicator is the strength of your referral loops,
+      and that is much harder to measure but much more predictive.
+    source: user
+
+  - text: >
+      How do you measure referral loop strength before you have enough volume for
+      cohort data to be meaningful? That is the core problem — we are too early
+      for quantitative methods to give us reliable signal, but too late to be
+      running purely on intuition.
+    source: user
+
+  - text: >
+      There is a whole territory around early-stage growth measurement that
+      traditional analytics tools are not designed for. You almost need qualitative
+      instrumentation — structured customer conversations treated as a measurement
+      system, not just a product discovery method.
+    source: user
+
+  - text: >
+      Let us commit to twenty customer conversations per month with a consistent
+      interview protocol as our measurement system for the next two quarters.
+      That is our substitute for quantitative attribution until we have the volume
+      for the numbers to be meaningful.
+    source: user
+
+expectations:
+  event_types:
+    - type: NEW_PROPOSITION
+      at_least: 2
+    - type: NEW_QUESTION
+      at_least: 1
+
+  recall_queries:
+    - query: "word of mouth growth unmeasurable optimization"
+      must_contain_keywords: ["word-of-mouth", "optimize", "measure", "flying blind"]
+      top_k: 3
+
+    - query: "attribution trailing indicator versus referral loop leading indicator"
+      must_contain_keywords: ["attribution", "trailing", "referral", "leading"]
+      top_k: 3
+
+    - query: "qualitative customer conversations as measurement system"
+      must_contain_keywords: ["qualitative", "customer", "interview", "measurement"]
+      top_k: 3
+
+    - query: "monthly customer interview protocol for early stage growth"
+      must_contain_keywords: ["monthly", "conversation", "protocol"]
+      top_k: 3
+
+  render_must_mention:
+    - "attribution"
+    - "growth"
+
+  quality_gates:
+    max_drop_rate: 0.40
+    min_nodes: 3
