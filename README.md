@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/cairn-logo.png" alt="Cairn" width="500">
+</p>
+
 # Cairn
 
 Your AI knows what you said. It doesn't know what you decided.
