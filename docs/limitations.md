@@ -40,17 +40,3 @@ Cairn is a working proof of concept. These are the boundaries of what it can and
 
 **Narrative rendering is unverified.** For graphs larger than 3 nodes, the structured summary can optionally be passed through an LLM for prose rendering. The fidelity of this narrative is not tested. Prefer structured views (`cairn.query()`, MCP `harness_query`) for authoritative graph state.
 
----
-
-## Future Improvements
-
-These are directions the architecture supports but that are not yet built:
-
-- **Confidence decay** with recency weighting (evidence strength is now implemented)
-- **Adaptive resolution thresholds** per domain or per node type
-- **Conversation deduplication** via idempotency keys on events
-- **Long-form ingestion** for documents, meeting transcripts, and email threads
-- **Background scanning** to proactively surface connections across graph neighborhoods
-- **Team/shared graphs** with conflict resolution for concurrent writers
-- **Observability dashboard** for classifier accuracy, resolution rates, and graph health over time
-- **Configurable classifier prompts** for domain-specific tuning
