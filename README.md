@@ -25,6 +25,11 @@ Create `.env.local` with your API key:
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+Then, from any project you want to use Cairn in:
+```bash
+cairn init
+```
+
 That's it. Cairn uses local embeddings (fastembed) by default, so no additional API keys are needed. For higher-quality embeddings, optionally add a [Voyage AI](https://www.voyageai.com/) key:
 ```
 VOYAGE_API_KEY=pa-...    # optional: auto-detected, upgrades embedding quality
@@ -38,47 +43,38 @@ Cairn has two integration surfaces. Choose the one that matches how you work.
 
 If you use Claude Code as your AI development tool, cairn integrates via hooks and an MCP server. No application code required.
 
-**Stop hook** -- captures every conversation automatically. Add to `.claude/settings.json`:
+From your project directory:
+
+```bash
+cairn init
+```
+
+This configures everything in one step:
+- **`.claude/settings.json`** -- Stop hook (captures conversations) + Orient hook (injects prior reasoning before each response)
+- **`.mcp.json`** -- MCP server exposing graph query tools
+- **Database** -- initialized at `./cairn.db`
+
+All paths are resolved automatically. Restart your Claude Code session after running `cairn init`.
+
+<details>
+<summary>Manual setup (if you prefer not to use cairn init)</summary>
+
+See [.mcp.json.example](.mcp.json.example) for the MCP server template. Hooks go in `.claude/settings.json`:
+
 ```json
 {
   "hooks": {
-    "Stop": [{
-      "type": "command",
-      "command": "/path/to/cairn/.venv/bin/python /path/to/cairn/scripts/hook_ingest.py"
-    }]
+    "Stop": [{"matcher": "", "hooks": [{"type": "command",
+      "command": "CAIRN_DB=\"/path/to/db\" /path/to/cairn/.venv/bin/python /path/to/cairn/scripts/hook_ingest.py"}]}],
+    "UserPromptSubmit": [{"matcher": "", "hooks": [{"type": "command",
+      "command": "CAIRN_DB=\"/path/to/db\" /path/to/cairn/.venv/bin/python /path/to/cairn/scripts/hook_orient.py",
+      "timeout": 10000}]}]
   }
 }
 ```
 
-**Orient hook** -- searches the graph for relevant prior reasoning and injects it into context before the model responds. Add to `.claude/settings.json` alongside the Stop hook:
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [{
-      "type": "command",
-      "command": "/path/to/cairn/.venv/bin/python /path/to/cairn/scripts/hook_orient.py"
-    }]
-  }
-}
-```
-
-Restart your Claude Code session after adding hooks. Hooks are loaded at session start.
-
-**MCP server** -- exposes the graph as queryable tools for deeper exploration (decision history, trace, disagreement map). Add to `.mcp.json` in your project root:
-```json
-{
-  "mcpServers": {
-    "cairn": {
-      "command": "/path/to/cairn/.venv/bin/python",
-      "args": ["-m", "cairn.mcp_server"],
-      "cwd": "/path/to/cairn",
-      "env": { "CAIRN_DB": "/path/to/cairn/cairn.db" }
-    }
-  }
-}
-```
-
-Replace `/path/to/cairn` with the absolute path where you cloned the repo.
+Replace all `/path/to/` values with absolute paths.
+</details>
 
 ### MCP Tools
 

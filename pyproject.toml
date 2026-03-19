@@ -28,6 +28,9 @@ dev = [
     "voyageai>=0.3.3",
 ]
 
+[project.scripts]
+cairn = "cairn.cli:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/cairn"]
 

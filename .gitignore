@@ -12,6 +12,7 @@ build/
 *.db-wal
 *.log
 .DS_Store
+.mcp.json
 .claude/
 CLAUDE.md
 **/CLAUDE.md
