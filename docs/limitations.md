@@ -32,8 +32,6 @@ Cairn is a working proof of concept. These are the boundaries of what it can and
 
 ## Capture
 
-**Stop hook captures only the last turn.** The Claude Code Stop hook processes the most recent user/assistant exchange, not the full session. Multi-turn reasoning within a single hook invocation captures only the final exchange.
-
 **No auto-capture outside Claude Code.** The Stop hook and UserPromptSubmit hook are Claude Code features. Other MCP clients can query the graph but won't auto-capture conversations unless the model calls `harness_ingest` explicitly, which is advisory and not guaranteed.
 
 ## Retrieval
