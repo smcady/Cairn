@@ -211,6 +211,10 @@ See [docs/limitations.md](docs/limitations.md) for a full list. Key points:
 
 - [Beyond Retrieval: A Case for Reasoning Memory](https://shawncady.substack.com/p/beyond-retrieval-a-case-for-reasoning) -- the full argument
 
+## Community
+
+Questions or ideas? Start a [discussion](https://github.com/smcady/Cairn/discussions).
+
 ## License
 
 MIT
