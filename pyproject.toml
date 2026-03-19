@@ -14,14 +14,18 @@ dependencies = [
     "networkx>=3.0,<4",
     "pydantic>=2.0,<3",
     "python-dotenv>=1.0",
-    "voyageai>=0.3.3",
+    "fastembed>=0.4",
     "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
+voyage = [
+    "voyageai>=0.3.3",
+]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
+    "voyageai>=0.3.3",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -31,5 +35,5 @@ packages = ["src/cairn"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 markers = [
-    "integration: marks tests as integration tests (require ANTHROPIC_API_KEY + VOYAGE_API_KEY)",
+    "integration: marks tests as integration tests (require ANTHROPIC_API_KEY; VOYAGE_API_KEY optional)",
 ]

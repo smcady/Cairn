@@ -1,16 +1,38 @@
-"""Tests for VectorIndex — sync operations and mocked async embed calls."""
+"""Tests for VectorIndex -- sync operations and mocked async embed calls."""
 
 from __future__ import annotations
 
 import json
 import os
 import tempfile
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import numpy as np
 import pytest
 
 from cairn.utils.vector_index import VectorIndex, _normalize
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _mock_provider(
+    embed_return: list[list[float]] | None = None,
+    provider_id: str = "test-provider",
+    dimensions: int = 3,
+) -> MagicMock:
+    """Return a MagicMock that satisfies the EmbeddingProvider protocol."""
+    provider = MagicMock()
+    provider.provider_id = provider_id
+    provider.dimensions = dimensions
+    provider.embed_documents = AsyncMock(
+        return_value=embed_return or [[1.0, 0.0, 0.0]]
+    )
+    provider.embed_query = AsyncMock(
+        return_value=(embed_return or [[1.0, 0.0, 0.0]])[0]
+    )
+    return provider
 
 
 # ---------------------------------------------------------------------------
@@ -39,14 +61,9 @@ class TestNormalize:
 # Sync cache operations (no API calls)
 # ---------------------------------------------------------------------------
 
-def _mock_client() -> MagicMock:
-    """Return a MagicMock that stands in for voyageai.AsyncClient without needing credentials."""
-    return MagicMock()
-
-
 class TestCosineSimilarity:
     def _index_with(self, vectors: dict[str, list[float]]) -> VectorIndex:
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         for node_id, vec in vectors.items():
             arr = np.array(vec, dtype=np.float32)
             idx._cache[node_id] = _normalize(arr)
@@ -65,7 +82,7 @@ class TestCosineSimilarity:
         assert idx.cosine_similarity("a", "b") == pytest.approx(-1.0, abs=1e-5)
 
     def test_missing_node_returns_none(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         assert idx.cosine_similarity("a", "b") is None
 
     def test_one_missing_returns_none(self):
@@ -75,16 +92,16 @@ class TestCosineSimilarity:
 
 class TestIndexedIds:
     def test_empty(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         assert idx.indexed_ids() == set()
 
     def test_contains_added(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         idx._cache["x"] = np.array([1.0, 0.0], dtype=np.float32)
         assert "x" in idx.indexed_ids()
 
     def test_len(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         idx._cache["a"] = np.array([1.0], dtype=np.float32)
         idx._cache["b"] = np.array([0.0], dtype=np.float32)
         assert len(idx) == 2
@@ -92,11 +109,11 @@ class TestIndexedIds:
 
 class TestRemove:
     def test_removes_from_cache_and_db(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         vec = [0.1, 0.2, 0.3]
         idx._conn.execute(
-            "INSERT INTO node_embeddings VALUES (?, ?, ?)",
-            ("n1", "abc", json.dumps(vec)),
+            "INSERT INTO node_embeddings VALUES (?, ?, ?, ?)",
+            ("n1", "abc", json.dumps(vec), "test-provider"),
         )
         idx._conn.commit()
         idx._cache["n1"] = np.array(vec, dtype=np.float32)
@@ -110,7 +127,7 @@ class TestRemove:
         assert row is None
 
     def test_remove_nonexistent_is_safe(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
+        idx = VectorIndex(":memory:", provider=_mock_provider())
         idx.remove("does_not_exist")  # should not raise
 
 
@@ -124,84 +141,142 @@ class TestPersistence:
             db_path = f.name
         try:
             vec = [0.1, 0.2, 0.3]
-            idx1 = VectorIndex(db_path, client=_mock_client())
+            provider = _mock_provider(provider_id="test-provider")
+            idx1 = VectorIndex(db_path, provider=provider)
             idx1._conn.execute(
-                "INSERT INTO node_embeddings VALUES (?, ?, ?)",
-                ("n1", "abc123", json.dumps(vec)),
+                "INSERT INTO node_embeddings VALUES (?, ?, ?, ?)",
+                ("n1", "abc123", json.dumps(vec), "test-provider"),
             )
             idx1._conn.commit()
             idx1.close()
 
-            idx2 = VectorIndex(db_path, client=_mock_client())
+            idx2 = VectorIndex(db_path, provider=_mock_provider(provider_id="test-provider"))
             assert "n1" in idx2.indexed_ids()
             sim = idx2.cosine_similarity("n1", "n1")
             assert sim == pytest.approx(1.0, abs=1e-5)
         finally:
             os.unlink(db_path)
 
+    def test_provider_switch_wipes_stale_embeddings(self):
+        """Switching providers clears embeddings from the old provider."""
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            db_path = f.name
+        try:
+            vec = [0.1, 0.2, 0.3]
+            # Create index, insert row, close -- simulates prior session
+            idx1 = VectorIndex(db_path, provider=_mock_provider(provider_id="provider-A"))
+            idx1._conn.execute(
+                "INSERT INTO node_embeddings VALUES (?, ?, ?, ?)",
+                ("n1", "abc123", json.dumps(vec), "provider-A"),
+            )
+            idx1._conn.commit()
+            idx1.close()
+
+            # Reopen with same provider -- should load the embedding
+            idx1b = VectorIndex(db_path, provider=_mock_provider(provider_id="provider-A"))
+            assert len(idx1b) == 1
+            idx1b.close()
+
+            # Reopen with different provider -- should wipe
+            idx2 = VectorIndex(db_path, provider=_mock_provider(provider_id="provider-B"))
+            assert len(idx2) == 0
+            assert idx2.indexed_ids() == set()
+            idx2.close()
+        finally:
+            os.unlink(db_path)
+
+    def test_legacy_empty_provider_id_treated_as_voyage(self):
+        """Rows with empty provider_id (pre-migration) are treated as Voyage."""
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            db_path = f.name
+        try:
+            vec = [0.1, 0.2, 0.3]
+            # Simulate legacy row with empty provider_id
+            provider_voyage = _mock_provider(provider_id="voyage-voyage-3-lite")
+            idx1 = VectorIndex(db_path, provider=provider_voyage)
+            idx1._conn.execute(
+                "INSERT INTO node_embeddings VALUES (?, ?, ?, ?)",
+                ("n1", "abc123", json.dumps(vec), ""),  # empty = legacy
+            )
+            idx1._conn.commit()
+            idx1.close()
+
+            # Reopen with Voyage provider -- should NOT wipe (legacy = Voyage)
+            idx2 = VectorIndex(db_path, provider=_mock_provider(provider_id="voyage-voyage-3-lite"))
+            assert "n1" in idx2.indexed_ids()
+            idx2.close()
+
+            # Reopen with fastembed -- SHOULD wipe
+            idx3 = VectorIndex(db_path, provider=_mock_provider(provider_id="fastembed-bge"))
+            assert len(idx3) == 0
+            idx3.close()
+        finally:
+            os.unlink(db_path)
+
 
 # ---------------------------------------------------------------------------
-# Async operations (mocked Voyage AI client)
+# Async operations (mocked embedding provider)
 # ---------------------------------------------------------------------------
-
-def _make_embed_response(vectors: list[list[float]]) -> MagicMock:
-    mock = MagicMock()
-    mock.embeddings = vectors
-    return mock
-
 
 class TestAdd:
     async def test_embeds_and_caches(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
-        idx._client.embed.return_value = _make_embed_response([[1.0, 0.0, 0.0]])
+        provider = _mock_provider(embed_return=[[1.0, 0.0, 0.0]])
+        idx = VectorIndex(":memory:", provider=provider)
 
         await idx.add("n1", "hello world")
 
         assert "n1" in idx._cache
-        idx._client.embed.assert_called_once()
+        provider.embed_documents.assert_called_once_with(["hello world"])
 
     async def test_skips_unchanged_text(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
-        idx._client.embed.return_value = _make_embed_response([[1.0, 0.0]])
+        provider = _mock_provider(embed_return=[[1.0, 0.0]])
+        idx = VectorIndex(":memory:", provider=provider)
 
         await idx.add("n1", "hello world")
         await idx.add("n1", "hello world")  # same text, same hash
 
-        assert idx._client.embed.call_count == 1
+        assert provider.embed_documents.call_count == 1
 
     async def test_reembeds_changed_text(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
-        idx._client.embed.return_value = _make_embed_response([[1.0, 0.0]])
+        provider = _mock_provider(embed_return=[[1.0, 0.0]])
+        idx = VectorIndex(":memory:", provider=provider)
 
         await idx.add("n1", "first text")
         await idx.add("n1", "different text")
 
-        assert idx._client.embed.call_count == 2
+        assert provider.embed_documents.call_count == 2
 
     async def test_skips_empty_text(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
+        provider = _mock_provider()
+        idx = VectorIndex(":memory:", provider=provider)
 
         await idx.add("n1", "")
         await idx.add("n2", "   ")
 
-        idx._client.embed.assert_not_called()
+        provider.embed_documents.assert_not_called()
         assert len(idx) == 0
+
+    async def test_stores_provider_id_in_db(self):
+        provider = _mock_provider(embed_return=[[1.0, 0.0, 0.0]], provider_id="my-provider")
+        idx = VectorIndex(":memory:", provider=provider)
+
+        await idx.add("n1", "hello")
+
+        row = idx._conn.execute(
+            "SELECT provider_id FROM node_embeddings WHERE node_id = ?", ("n1",)
+        ).fetchone()
+        assert row["provider_id"] == "my-provider"
 
 
 class TestSearch:
     async def test_returns_sorted_by_score(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
-        # Query vector: [1, 0, 0]
-        idx._client.embed.return_value = _make_embed_response([[1.0, 0.0, 0.0]])
+        provider = _mock_provider()
+        provider.embed_query = AsyncMock(return_value=[1.0, 0.0, 0.0])
+        idx = VectorIndex(":memory:", provider=provider)
 
         # Pre-populate cache with known normalized vectors
-        idx._cache["high"] = np.array([1.0, 0.0, 0.0], dtype=np.float32)   # score ≈ 1.0
-        idx._cache["low"] = np.array([0.0, 1.0, 0.0], dtype=np.float32)    # score ≈ 0.0
+        idx._cache["high"] = np.array([1.0, 0.0, 0.0], dtype=np.float32)   # score ~ 1.0
+        idx._cache["low"] = np.array([0.0, 1.0, 0.0], dtype=np.float32)    # score ~ 0.0
 
         results = await idx.search("query", k=10)
 
@@ -211,17 +286,17 @@ class TestSearch:
         assert results[1][1] == pytest.approx(0.0, abs=1e-5)
 
     async def test_empty_cache_returns_empty(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
+        provider = _mock_provider()
+        idx = VectorIndex(":memory:", provider=provider)
 
         results = await idx.search("anything", k=5)
         assert results == []
-        idx._client.embed.assert_not_called()
+        provider.embed_query.assert_not_called()
 
     async def test_respects_k_limit(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
-        idx._client.embed.return_value = _make_embed_response([[1.0, 0.0]])
+        provider = _mock_provider()
+        provider.embed_query = AsyncMock(return_value=[1.0, 0.0])
+        idx = VectorIndex(":memory:", provider=provider)
 
         for i in range(10):
             idx._cache[f"n{i}"] = np.array([1.0, 0.0], dtype=np.float32)
@@ -230,11 +305,43 @@ class TestSearch:
         assert len(results) == 3
 
     async def test_node_ids_filter(self):
-        idx = VectorIndex(":memory:", client=_mock_client())
-        idx._client = AsyncMock()
-        idx._client.embed.return_value = _make_embed_response([[1.0, 0.0]])
+        provider = _mock_provider()
+        provider.embed_query = AsyncMock(return_value=[1.0, 0.0])
+        idx = VectorIndex(":memory:", provider=provider)
         idx._cache["a"] = np.array([1.0, 0.0], dtype=np.float32)
         idx._cache["b"] = np.array([1.0, 0.0], dtype=np.float32)
 
         results = await idx.search("q", node_ids=["a"])
         assert all(r[0] == "a" for r in results)
+
+
+# ---------------------------------------------------------------------------
+# Budget guard
+# ---------------------------------------------------------------------------
+
+class TestBudget:
+    async def test_budget_enforced(self):
+        from cairn.utils.vector_index import EmbedBudgetError
+
+        provider = _mock_provider(embed_return=[[1.0, 0.0]])
+        idx = VectorIndex(":memory:", provider=provider, max_requests=2)
+
+        await idx.add("n1", "text one")
+        await idx.add("n2", "text two")
+
+        with pytest.raises(EmbedBudgetError):
+            await idx.add("n3", "text three")
+
+    def test_budget_env_var_cairn(self, monkeypatch):
+        """CAIRN_EMBED_MAX_REQUESTS takes precedence."""
+        monkeypatch.setenv("CAIRN_EMBED_MAX_REQUESTS", "42")
+        monkeypatch.setenv("VOYAGE_MAX_REQUESTS", "99")
+        from cairn.utils.vector_index import _resolve_max_requests
+        assert _resolve_max_requests() == 42
+
+    def test_budget_env_var_voyage_fallback(self, monkeypatch):
+        """VOYAGE_MAX_REQUESTS used as fallback."""
+        monkeypatch.delenv("CAIRN_EMBED_MAX_REQUESTS", raising=False)
+        monkeypatch.setenv("VOYAGE_MAX_REQUESTS", "99")
+        from cairn.utils.vector_index import _resolve_max_requests
+        assert _resolve_max_requests() == 99

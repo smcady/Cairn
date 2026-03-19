@@ -96,7 +96,10 @@ def status() -> str:
     if not os.environ.get("ANTHROPIC_API_KEY"):
         warnings.append("⚠ ANTHROPIC_API_KEY is not set. The classifier will fail on ingest.")
     if not os.environ.get("VOYAGE_API_KEY"):
-        warnings.append("⚠ VOYAGE_API_KEY is not set. Semantic search (orient, search) will not work.")
+        warnings.append(
+            "ℹ VOYAGE_API_KEY is not set. Using local embeddings (fastembed). "
+            "Set VOYAGE_API_KEY for higher-quality Voyage AI embeddings."
+        )
 
     summary = render_structured_summary(engine.graph)
     stats_lines = "\n".join(f"  {k}: {v}" for k, v in stats.items())

@@ -20,10 +20,14 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-Create `.env.local` with your API keys:
+Create `.env.local` with your API key:
 ```
 ANTHROPIC_API_KEY=sk-ant-...
-VOYAGE_API_KEY=pa-...
+```
+
+That's it. Cairn uses local embeddings (fastembed) by default, so no additional API keys are needed. For higher-quality embeddings, optionally add a [Voyage AI](https://www.voyageai.com/) key:
+```
+VOYAGE_API_KEY=pa-...    # optional: auto-detected, upgrades embedding quality
 ```
 
 Cairn has two integration surfaces. Choose the one that matches how you work.
@@ -183,7 +187,7 @@ Each user builds their own graph; the database is gitignored. For details on sco
 
 - Python 3.12+
 - [ANTHROPIC_API_KEY](https://console.anthropic.com/) -- classifier LLM
-- [VOYAGE_API_KEY](https://www.voyageai.com/) -- vector embeddings
+- [VOYAGE_API_KEY](https://www.voyageai.com/) -- optional. Use Anthropic's embedding partner for higher-quality vector embeddings (local fastembed used by default)
 
 ## Tests
 
@@ -201,7 +205,7 @@ See [docs/limitations.md](docs/limitations.md) for a full list. Key points:
 
 - **Single-user system** -- each person builds their own graph; shared team memory is out of scope for this implementation
 - **Classifier is domain-dependent** -- tested on business strategy conversations; may need tuning for other domains
-- **Confidence scoring is simplified** -- linear increments, no recency weighting or evidence strength
+- **Confidence scoring** -- evidence-strength-weighted deltas are implemented, but no recency decay yet
 
 ## Further Reading
 

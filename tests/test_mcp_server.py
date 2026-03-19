@@ -181,8 +181,8 @@ class TestStatusHealthChecks:
             assert "ANTHROPIC_API_KEY" in result
 
     @patch("cairn.mcp_server.VectorIndex", return_value=MagicMock())
-    def test_warns_on_missing_voyage_key(self, mock_vi, tmp_path):
-        """Missing VOYAGE_API_KEY should produce a warning."""
+    def test_info_on_missing_voyage_key(self, mock_vi, tmp_path):
+        """Missing VOYAGE_API_KEY should show info about local embeddings."""
         db = str(tmp_path / "test.db")
 
         clean_env = {k: v for k, v in os.environ.items() if k != "VOYAGE_API_KEY"}
@@ -191,7 +191,7 @@ class TestStatusHealthChecks:
         with patch.dict(os.environ, clean_env, clear=True):
             server = self._reset_server(db)
             result = server.status()
-            assert "VOYAGE_API_KEY" in result
+            assert "local embeddings" in result
 
     @patch("cairn.mcp_server.VectorIndex", return_value=MagicMock())
     def test_no_warnings_when_healthy(self, mock_vi, tmp_path):

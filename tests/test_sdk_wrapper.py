@@ -65,7 +65,7 @@ class TestGetEngine:
 
     @pytest.fixture(autouse=True)
     def mock_voyage(self, monkeypatch):
-        """Prevent VectorIndex from requiring a real Voyage API key."""
+        """Set VOYAGE_API_KEY so VoyageProvider is selected (voyageai in dev deps)."""
         monkeypatch.setenv("VOYAGE_API_KEY", "test-fake-key")
 
     def test_creates_engine(self, tmp_path):

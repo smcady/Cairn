@@ -1,7 +1,11 @@
-"""Semantic vector index for graph nodes using Voyage AI embeddings.
+"""Semantic vector index for graph nodes.
 
 Embeddings are persisted in SQLite (same file as EventLog, separate table) and cached
 in memory for fast cosine similarity without redundant API calls.
+
+Supports pluggable embedding providers via the EmbeddingProvider protocol.
+Default provider is auto-detected: Voyage AI if VOYAGE_API_KEY is set,
+otherwise local fastembed (no API key needed).
 
 Usage:
     index = VectorIndex(db_path)
@@ -10,35 +14,44 @@ Usage:
     score = index.cosine_similarity(a, b)   # sync, from in-memory cache
 
 Budget guard:
-    VectorIndex counts every Voyage AI API call (add + search). When the session total
+    VectorIndex counts every embedding API call (add + search). When the session total
     reaches ``max_requests``, further calls raise ``EmbedBudgetError`` immediately.
-    Default cap: VOYAGE_MAX_REQUESTS env var, or 500 if unset.
-    Set VOYAGE_MAX_REQUESTS=0 to disable the cap entirely.
+    Default cap: CAIRN_EMBED_MAX_REQUESTS or VOYAGE_MAX_REQUESTS env var, or 500 if unset.
+    Set the env var to 0 to disable the cap entirely.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import sqlite3
 from pathlib import Path
 
 import numpy as np
-import voyageai
 
-EMBEDDING_MODEL = "voyage-3-lite"
+from cairn.utils.embedding_providers import EmbeddingProvider, get_default_provider
+
+logger = logging.getLogger("cairn")
 
 _DEFAULT_MAX_REQUESTS = 500
 
+# Legacy provider_id for rows created before provider tracking was added.
+# These were always created by voyage-3-lite.
+_LEGACY_PROVIDER_ID = "voyage-voyage-3-lite"
+
 
 class EmbedBudgetError(RuntimeError):
-    """Raised when the per-session Voyage AI request cap is exceeded."""
+    """Raised when the per-session embedding request cap is exceeded."""
 
 
 def _resolve_max_requests() -> int | None:
-    """Read VOYAGE_MAX_REQUESTS from env. Returns None (unlimited) if set to 0."""
-    raw = os.environ.get("VOYAGE_MAX_REQUESTS", str(_DEFAULT_MAX_REQUESTS))
+    """Read embed budget from env. Returns None (unlimited) if set to 0."""
+    raw = os.environ.get(
+        "CAIRN_EMBED_MAX_REQUESTS",
+        os.environ.get("VOYAGE_MAX_REQUESTS", str(_DEFAULT_MAX_REQUESTS)),
+    )
     try:
         val = int(raw)
     except ValueError:
@@ -52,7 +65,7 @@ class VectorIndex:
     def __init__(
         self,
         db_path: str | Path = ":memory:",
-        client: voyageai.AsyncClient | None = None,
+        provider: EmbeddingProvider | None = None,
         max_requests: int | None = None,
     ) -> None:
         self._db_path = str(db_path)
@@ -61,7 +74,7 @@ class VectorIndex:
         if self._db_path != ":memory:":
             self._conn.execute("PRAGMA journal_mode=WAL")
         self._init_schema()
-        self._client = client if client is not None else voyageai.AsyncClient()
+        self._provider = provider if provider is not None else get_default_provider()
         # Billing guard: caller can override; otherwise use env var default
         self._max_requests: int | None = (
             max_requests if max_requests is not None else _resolve_max_requests()
@@ -77,8 +90,8 @@ class VectorIndex:
             return
         if self._request_count >= self._max_requests:
             raise EmbedBudgetError(
-                f"Voyage AI request cap reached ({self._request_count}/{self._max_requests}). "
-                f"Set VOYAGE_MAX_REQUESTS to a higher value or 0 to disable. "
+                f"Embedding request cap reached ({self._request_count}/{self._max_requests}). "
+                f"Set CAIRN_EMBED_MAX_REQUESTS to a higher value or 0 to disable. "
                 f"Current session has made {self._request_count} embed calls."
             )
 
@@ -87,17 +100,50 @@ class VectorIndex:
             CREATE TABLE IF NOT EXISTS node_embeddings (
                 node_id   TEXT PRIMARY KEY,
                 text_hash TEXT NOT NULL,
-                embedding TEXT NOT NULL
+                embedding TEXT NOT NULL,
+                provider_id TEXT NOT NULL DEFAULT ''
             )
         """)
         self._conn.commit()
+        # Migration: add provider_id column to existing tables
+        try:
+            self._conn.execute(
+                "ALTER TABLE node_embeddings ADD COLUMN provider_id TEXT NOT NULL DEFAULT ''"
+            )
+            self._conn.commit()
+        except sqlite3.OperationalError:
+            pass  # column already exists
 
     def _load_cache(self) -> None:
+        """Load embeddings from SQLite into memory. Wipes stale embeddings from a different provider."""
+        current_id = self._provider.provider_id
+
+        # Check for provider mismatch
+        row = self._conn.execute(
+            "SELECT provider_id FROM node_embeddings LIMIT 1"
+        ).fetchone()
+        if row is not None:
+            stored_id = row["provider_id"]
+            # Treat empty string as legacy Voyage embeddings
+            effective_stored = stored_id if stored_id else _LEGACY_PROVIDER_ID
+            if effective_stored != current_id:
+                count = self._conn.execute(
+                    "SELECT COUNT(*) FROM node_embeddings"
+                ).fetchone()[0]
+                logger.warning(
+                    "cairn: embedding provider changed (%s -> %s). "
+                    "Clearing %d stale embeddings (will re-embed on next access).",
+                    effective_stored, current_id, count,
+                )
+                self._conn.execute("DELETE FROM node_embeddings")
+                self._conn.commit()
+                return
+
         rows = self._conn.execute(
             "SELECT node_id, embedding FROM node_embeddings"
         ).fetchall()
         for row in rows:
-            vec = np.array(json.loads(row["node_id" if False else "embedding"]), dtype=np.float32)
+            vec = np.array(json.loads(row["embedding"]), dtype=np.float32)
             self._cache[row["node_id"]] = _normalize(vec)
 
     # ------------------------------------------------------------------
@@ -118,13 +164,13 @@ class VectorIndex:
 
         self._check_budget()
         self._request_count += 1
-        result = await self._client.embed([text], model=EMBEDDING_MODEL, input_type="document")
-        embedding: list[float] = result.embeddings[0]
+        vectors = await self._provider.embed_documents([text])
+        embedding: list[float] = vectors[0]
 
         self._conn.execute(
-            """INSERT OR REPLACE INTO node_embeddings (node_id, text_hash, embedding)
-               VALUES (?, ?, ?)""",
-            (node_id, text_hash, json.dumps(embedding)),
+            """INSERT OR REPLACE INTO node_embeddings (node_id, text_hash, embedding, provider_id)
+               VALUES (?, ?, ?, ?)""",
+            (node_id, text_hash, json.dumps(embedding), self._provider.provider_id),
         )
         self._conn.commit()
         self._cache[node_id] = _normalize(np.array(embedding, dtype=np.float32))
@@ -157,8 +203,8 @@ class VectorIndex:
 
         self._check_budget()
         self._request_count += 1
-        result = await self._client.embed([query], model=EMBEDDING_MODEL, input_type="query")
-        query_vec = _normalize(np.array(result.embeddings[0], dtype=np.float32))
+        query_embedding = await self._provider.embed_query(query)
+        query_vec = _normalize(np.array(query_embedding, dtype=np.float32))
 
         candidates = node_ids if node_ids is not None else list(self._cache.keys())
         scores: list[tuple[str, float]] = []

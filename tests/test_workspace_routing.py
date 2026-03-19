@@ -2,40 +2,12 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 from cairn.models.events import Event, EventLog, EventType
 from cairn.models.graph_types import GraphNode, IdeaGraph, NodeType
 from cairn.models.workspace import WorkspaceRegistry
-from cairn.pipeline.embedding_store import EmbeddingStore
 from cairn.pipeline.mutator import apply_event
-
-
-def _make_embedding_store(monkeypatch) -> EmbeddingStore:
-    """Create an in-memory EmbeddingStore with mocked _embed."""
-    store = EmbeddingStore.__new__(EmbeddingStore)
-    import sqlite3
-    store._api_key = "fake"
-    store._voyage_client = None
-    conn = sqlite3.connect(":memory:")
-    conn.row_factory = sqlite3.Row
-    store._conn = conn
-    store._init_schema()
-
-    call_n = [0]
-
-    async def deterministic_embed(texts):
-        result = []
-        for _ in texts:
-            v = np.zeros(16, dtype=np.float32)
-            v[call_n[0] % 16] = 1.0
-            call_n[0] += 1
-            result.append(v)
-        return result
-
-    monkeypatch.setattr(store, "_embed", deterministic_embed)
-    return store
 
 
 class TestWorkspaceIdPropagation:

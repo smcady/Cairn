@@ -19,7 +19,7 @@ Text input
 - **Classify** (`pipeline/classifier.py`): One LLM call (`claude-sonnet-4-5-20250929`) extracts typed cognitive events from text. Uses tool use for structured Pydantic output. Passes active nodes as `[{type, text}]` — no IDs. Returns `list[ClassifiedEvent]`.
 - **Resolve** (`pipeline/resolver.py`): Embeds each `*_node_description` field and searches the VectorIndex. Default threshold: 0.82 cosine similarity. Required refs that fail resolution → event dropped. Optional refs silently omitted.
 - **Mutate** (`pipeline/mutator.py`): Deterministic graph operations — each handler creates/modifies nodes. No LLM call. 12 event type handlers.
-- **Index** (`utils/vector_index.py`): Embeds new/updated nodes via Voyage AI `voyage-3-lite`. Hash-based dedup skips re-embedding unchanged text.
+- **Index** (`utils/vector_index.py`): Embeds new/updated nodes via pluggable `EmbeddingProvider`. Default: local fastembed (BAAI/bge-small-en-v1.5, 384-dim). With `VOYAGE_API_KEY`: Voyage AI voyage-3-lite (512-dim). Hash-based dedup skips re-embedding unchanged text.
 - **Render** (`pipeline/renderer.py`): Two modes — `render_structured_summary()` (deterministic, no LLM) and `render_narrative()` (LLM call for prose). Falls back to structured for graphs ≤ 3 nodes.
 
 **Key invariant**: the classifier never sees or outputs node IDs. The resolver owns node resolution.
@@ -28,7 +28,7 @@ Text input
 
 - **Events** (`models/events.py`): Append-only SQLite event log with WAL mode. All state changes are events with typed payloads validated by Pydantic. Graph is rebuilt from events on startup via `replay_events()`.
 - **Graph** (`models/graph_types.py`): NetworkX MultiDiGraph wrapped in `IdeaGraph`. 9 node types (PROPOSITION, QUESTION, TENSION, TERRITORY, EVIDENCE, OBJECTION, SYNTHESIS, FRAME, ABSTRACTION), 10 edge types. Nodes carry confidence scores, status lifecycle, depth tracking, and version history.
-- **Embeddings** (`utils/vector_index.py`): `VectorIndex` backed by `node_embeddings` SQLite table (same file as EventLog). Voyage AI `voyage-3-lite` model (512-dim). In-memory numpy cache for fast cosine similarity.
+- **Embeddings** (`utils/vector_index.py`): `VectorIndex` backed by `node_embeddings` SQLite table (same file as EventLog). Pluggable provider via `EmbeddingProvider` protocol (`utils/embedding_providers.py`). Default: fastembed BAAI/bge-small-en-v1.5 (384-dim, local ONNX). Optional: Voyage AI voyage-3-lite (512-dim, requires `VOYAGE_API_KEY`). Provider auto-detected from env. Switching providers automatically invalidates stale embeddings. In-memory numpy cache for fast cosine similarity.
 
 ## MemoryEngine (`memory/engine.py`)
 
@@ -62,7 +62,8 @@ FastMCP server exposing reasoning graph as tools for Claude Code and other MCP c
 | Stage | Model |
 |-------|-------|
 | Classifier | `claude-sonnet-4-5-20250929` |
-| Embeddings | `voyage-3-lite` via Voyage AI |
+| Embeddings (default) | `BAAI/bge-small-en-v1.5` via fastembed (local) |
+| Embeddings (optional) | `voyage-3-lite` via Voyage AI (set `VOYAGE_API_KEY`) |
 | Renderer (narrative) | `claude-sonnet-4-5-20250929` |
 
 ## Structured Output
