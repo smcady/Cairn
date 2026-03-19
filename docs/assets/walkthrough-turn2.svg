@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 250" font-family="Inter, -apple-system, sans-serif">
+  <style>
+    .node-box { rx: 8; ry: 8; stroke-width: 1.5; }
+    .prop-box { fill: #FAFAFA; stroke: #888; }
+    .q-box { fill: #FAFAFA; stroke: #999; stroke-dasharray: 5,3; }
+    .ev-box { fill: #F0F0F0; stroke: #AAA; stroke-width: 1; }
+    .type-label { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; fill: #888; }
+    .node-text { font-size: 12px; font-weight: 500; fill: #333; }
+    .ev-text { font-size: 11px; font-weight: 500; fill: #666; }
+    .meta-text { font-size: 10px; fill: #999; }
+    .conf-text { font-size: 10px; font-weight: 600; fill: #555; }
+    .edge-line { stroke: #888; stroke-width: 1.5; fill: none; }
+    .edge-label { font-size: 9px; font-weight: 600; fill: #888; letter-spacing: 0.05em; }
+    .arrow { fill: #888; }
+    .conf-bump { font-size: 10px; font-weight: 600; fill: #555; }
+  </style>
+
+  <!-- Proposition node (confidence updated) -->
+  <rect class="node-box prop-box" x="20" y="20" width="270" height="80" />
+  <text class="type-label" x="36" y="42">Proposition</text>
+  <text class="node-text" x="36" y="60">Usage-based pricing aligns</text>
+  <text class="node-text" x="36" y="75">revenue with customer value</text>
+  <text class="conf-text" x="36" y="92">confidence: 0.50 &#x2192; 0.64</text>
+
+  <!-- Question node (unchanged) -->
+  <rect class="node-box q-box" x="330" y="20" width="270" height="70" />
+  <text class="type-label" x="346" y="42">? Question</text>
+  <text class="node-text" x="346" y="60">How to handle customers with</text>
+  <text class="node-text" x="346" y="75">low or unpredictable usage</text>
+
+  <!-- Edge: supports arrow -->
+  <line class="edge-line" x1="100" y1="100" x2="100" y2="140" />
+  <polygon class="arrow" points="95,138 100,148 105,138" />
+  <text class="edge-label" x="112" y="128">SUPPORTS (0.70)</text>
+
+  <!-- Evidence node -->
+  <rect class="node-box ev-box" x="20" y="150" width="270" height="65" />
+  <text class="type-label" x="36" y="170">Evidence</text>
+  <text class="ev-text" x="36" y="188">40% revenue increase after switching</text>
+  <text class="ev-text" x="36" y="203">from flat-rate at prior company</text>
+
+  <!-- Stats bar -->
+  <text class="meta-text" x="20" y="242">3 nodes</text>
+  <text class="meta-text" x="100" y="242">1 edge</text>
+  <text class="meta-text" x="175" y="242">evidence strength: 0.70 (quantitative data)</text>
+</svg>

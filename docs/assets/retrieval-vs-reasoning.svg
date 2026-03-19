@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" font-family="Inter, system-ui, sans-serif">
+  <!-- no global text fill - colors set per element -->
+
+  <!-- Background -->
+  <rect width="960" height="540" fill="#F8F8F8" rx="0"/>
+
+  <!-- Title -->
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#1A1A1A" letter-spacing="-0.3px">Same conversation. Two different pictures of where you are.</text>
+  <text x="480" y="46" text-anchor="middle" font-size="11" fill="#909090">A single query. What each memory system sees.</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- LEFT COLUMN: Retrieval Memory          -->
+  <!-- ═══════════════════════════════════════ -->
+  <rect x="20" y="60" width="290" height="440" rx="8" fill="#FFFFFF" stroke="#D8D8D8" stroke-width="1"/>
+
+  <!-- Header -->
+  <text x="36" y="82" font-size="8" font-weight="600" fill="#777" letter-spacing="1px" text-transform="uppercase">RETRIEVAL MEMORY</text>
+  <text x="36" y="96" font-size="10" fill="#909090" font-style="italic">finds what matches</text>
+
+  <!-- Result card 1 -->
+  <rect x="32" y="110" width="266" height="36" rx="5" fill="#F3F3F3" stroke="#D0D0D0" stroke-width="0.75"/>
+  <text x="44" y="132" font-size="10" font-weight="600" fill="#777">0.91</text>
+  <text x="78" y="132" font-size="10" fill="#3A3A3A">"We should take Approach A"</text>
+
+  <!-- Result card 2 -->
+  <rect x="32" y="152" width="266" height="36" rx="5" fill="#F3F3F3" stroke="#D0D0D0" stroke-width="0.75"/>
+  <text x="44" y="174" font-size="10" font-weight="600" fill="#777">0.88</text>
+  <text x="78" y="168" font-size="10" fill="#3A3A3A">"Approach A won't work</text>
+  <text x="78" y="180" font-size="10" fill="#3A3A3A"> - Constraint X rules it out"</text>
+
+  <!-- Result card 3 -->
+  <rect x="32" y="194" width="266" height="36" rx="5" fill="#F3F3F3" stroke="#D0D0D0" stroke-width="0.75"/>
+  <text x="44" y="216" font-size="10" font-weight="600" fill="#777">0.85</text>
+  <text x="78" y="216" font-size="10" fill="#3A3A3A">"Given that, Approach B is the right path"</text>
+
+  <!-- Result card 4 -->
+  <rect x="32" y="236" width="266" height="36" rx="5" fill="#F3F3F3" stroke="#D0D0D0" stroke-width="0.75"/>
+  <text x="44" y="258" font-size="10" font-weight="600" fill="#777">0.82</text>
+  <text x="78" y="258" font-size="10" fill="#3A3A3A">"Still unclear on Edge Case Y"</text>
+
+  <!-- Response box -->
+  <rect x="32" y="390" width="266" height="98" rx="6" fill="#F3F3F3" stroke="#D0D0D0" stroke-width="0.75"/>
+  <text x="44" y="408" font-size="7.5" font-weight="600" fill="#777" letter-spacing="0.8px">RESPONSE TO QUERY</text>
+  <text x="44" y="426" font-size="10" fill="#909090">Approach A was proposed as the initial</text>
+  <text x="44" y="440" font-size="10" fill="#909090">direction. There are also notes about</text>
+  <text x="44" y="454" font-size="10" fill="#909090">Constraint X and Approach B.</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CENTER COLUMN: The Conversation        -->
+  <!-- ═══════════════════════════════════════ -->
+  <rect x="315" y="60" width="330" height="440" rx="0" fill="#2A2A2A"/>
+  <!-- Top accent bar -->
+  <rect x="315" y="60" width="330" height="3" fill="#555"/>
+
+  <!-- Header -->
+  <text x="336" y="84" font-size="8" font-weight="600" fill="#808080" letter-spacing="1.2px">THE CONVERSATION</text>
+
+  <!-- Timeline track -->
+  <line x1="349" y1="105" x2="349" y2="360" stroke="#444" stroke-width="1"/>
+
+  <!-- Turn 1 -->
+  <circle cx="349" cy="110" r="4" fill="#444" stroke="#606060" stroke-width="1.5"/>
+  <text x="362" y="107" font-size="7.5" font-weight="600" fill="#606060" letter-spacing="0.5px">TURN 1</text>
+  <text x="362" y="120" font-size="10" fill="#EEE">"We should take Approach A"</text>
+
+  <!-- Turn 3 -->
+  <circle cx="349" cy="150" r="4" fill="#444" stroke="#606060" stroke-width="1.5"/>
+  <text x="362" y="147" font-size="7.5" font-weight="600" fill="#606060" letter-spacing="0.5px">TURN 3</text>
+  <text x="362" y="160" font-size="10" fill="#EEE">"Approach A won't work</text>
+  <text x="362" y="172" font-size="10" fill="#EEE"> - Constraint X rules it out"</text>
+
+  <!-- Turn 5 -->
+  <circle cx="349" cy="198" r="4" fill="#444" stroke="#606060" stroke-width="1.5"/>
+  <text x="362" y="195" font-size="7.5" font-weight="600" fill="#606060" letter-spacing="0.5px">TURN 5</text>
+  <text x="362" y="208" font-size="10" fill="#EEE">"Given that, Approach B is the</text>
+  <text x="362" y="220" font-size="10" fill="#EEE"> right path forward"</text>
+
+  <!-- Turn 7 -->
+  <circle cx="349" cy="248" r="4" fill="#444" stroke="#606060" stroke-width="1.5"/>
+  <text x="362" y="245" font-size="7.5" font-weight="600" fill="#606060" letter-spacing="0.5px">TURN 7</text>
+  <text x="362" y="258" font-size="10" fill="#EEE">"Still unclear how to handle</text>
+  <text x="362" y="270" font-size="10" fill="#EEE"> Edge Case Y"</text>
+
+  <!-- Divider -->
+  <line x1="362" y1="295" x2="560" y2="295" stroke="#444" stroke-width="1"/>
+  <text x="575" y="299" font-size="7.5" font-weight="600" fill="#555" letter-spacing="0.8px">NEW QUERY</text>
+
+  <!-- Turn 9 (query) -->
+  <circle cx="349" cy="330" r="4" fill="#555" stroke="#555" stroke-width="1.5"/>
+  <rect x="362" y="314" width="260" height="32" rx="5" fill="#3A3A3A" stroke="#555" stroke-width="1"/>
+  <text x="374" y="325" font-size="7.5" font-weight="600" fill="#606060" letter-spacing="0.5px">TURN 9</text>
+  <text x="374" y="339" font-size="10.5" font-weight="500" fill="#EEE">"Should we reconsider Approach A?"</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- RIGHT COLUMN: Reasoning Memory         -->
+  <!-- ═══════════════════════════════════════ -->
+  <rect x="650" y="60" width="290" height="440" rx="8" fill="#FFFFFF" stroke="#D8D8D8" stroke-width="1"/>
+
+  <!-- Header -->
+  <text x="666" y="82" font-size="8" font-weight="600" fill="#555" letter-spacing="1px">REASONING MEMORY</text>
+  <text x="666" y="96" font-size="10" fill="#909090" font-style="italic">understands where you are</text>
+
+  <!-- Node: Approach A (superseded) -->
+  <rect x="666" y="108" width="180" height="36" rx="5" fill="#F3F3F3" stroke="#C0C0C0" stroke-width="1"/>
+  <text x="678" y="122" font-size="7" font-weight="600" fill="#C0C0C0" letter-spacing="0.8px">SUPERSEDED</text>
+  <text x="678" y="136" font-size="11" fill="#999" text-decoration="line-through">Approach A</text>
+
+  <!-- Edge: Contradicted by -->
+  <line x1="690" y1="144" x2="690" y2="170" stroke="#C0C0C0" stroke-width="1"/>
+  <polygon points="687,168 693,168 690,174" fill="#C0C0C0"/>
+  <text x="698" y="162" font-size="7" font-weight="600" fill="#909090" letter-spacing="0.7px">CONTRADICTED BY</text>
+
+  <!-- Node: Constraint X (neutral) -->
+  <rect x="666" y="176" width="180" height="44" rx="5" fill="#EEE" stroke="#C8C8C8" stroke-width="1"/>
+  <text x="678" y="194" font-size="11" fill="#555">Constraint X</text>
+  <text x="678" y="208" font-size="8.5" fill="#909090">rules out Approach A</text>
+
+  <!-- Edge: Resolved by -->
+  <line x1="690" y1="220" x2="690" y2="246" stroke="#555" stroke-width="1"/>
+  <polygon points="687,244 693,244 690,250" fill="#555"/>
+  <text x="698" y="238" font-size="7" font-weight="600" fill="#555" letter-spacing="0.7px">RESOLVED BY</text>
+
+  <!-- Node: Approach B (settled) -->
+  <rect x="666" y="252" width="180" height="44" rx="5" fill="#F0F0F0" stroke="#555" stroke-width="2"/>
+  <text x="678" y="268" font-size="7" font-weight="600" fill="#555" letter-spacing="0.8px">SETTLED</text>
+  <text x="678" y="282" font-size="11" font-weight="700" fill="#333">Approach B</text>
+  <text x="678" y="292" font-size="8.5" fill="#909090">current position</text>
+
+  <!-- Node: Edge Case Y (open, dashed) -->
+  <rect x="666" y="310" width="180" height="36" rx="5" fill="#F8F8F8" stroke="#909090" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="678" y="324" font-size="7" font-weight="600" fill="#909090" letter-spacing="0.8px">? OPEN</text>
+  <text x="678" y="338" font-size="11" fill="#777">Edge Case Y</text>
+
+  <!-- Node: Synthesis -->
+  <rect x="666" y="358" width="260" height="44" rx="5" fill="#F0F0F0" stroke="#777" stroke-width="1.5"/>
+  <text x="678" y="374" font-size="7" font-weight="600" fill="#777" letter-spacing="0.8px">SYNTHESIS</text>
+  <text x="678" y="388" font-size="9.5" fill="#555">General principle from Constraint X</text>
+  <text x="678" y="400" font-size="8" fill="#909090" font-style="italic">emergent, not directly stated in any turn</text>
+
+  <!-- Response box -->
+  <rect x="666" y="412" width="260" height="76" rx="6" fill="#F0F0F0" stroke="#555" stroke-width="1"/>
+  <text x="678" y="430" font-size="7.5" font-weight="600" fill="#555" letter-spacing="0.8px">RESPONSE TO QUERY</text>
+  <text x="678" y="448" font-size="10.5" font-weight="600" fill="#333">This ground has been covered.</text>
+  <text x="678" y="462" font-size="10" fill="#3A3A3A">Approach A was ruled out. Current</text>
+  <text x="678" y="474" font-size="10" fill="#3A3A3A">position: Approach B. Edge Case Y open.</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Caption                                -->
+  <!-- ═══════════════════════════════════════ -->
+  <text x="480" y="524" text-anchor="middle" font-size="10.5" fill="#909090" font-style="italic">Retrieval memory finds relevant content. Reasoning memory understands current state.</text>
+</svg>

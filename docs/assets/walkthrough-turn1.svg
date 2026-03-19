@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 160" font-family="Inter, -apple-system, sans-serif">
+  <style>
+    .node-box { rx: 8; ry: 8; stroke-width: 1.5; }
+    .prop-box { fill: #FAFAFA; stroke: #888; }
+    .q-box { fill: #FAFAFA; stroke: #999; stroke-dasharray: 5,3; }
+    .type-label { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; fill: #888; }
+    .node-text { font-size: 12px; font-weight: 500; fill: #333; }
+    .meta-text { font-size: 10px; fill: #999; }
+  </style>
+
+  <!-- Proposition node -->
+  <rect class="node-box prop-box" x="20" y="20" width="270" height="70" />
+  <text class="type-label" x="36" y="42">Proposition</text>
+  <text class="node-text" x="36" y="60">Usage-based pricing aligns</text>
+  <text class="node-text" x="36" y="75">revenue with customer value</text>
+
+  <!-- Question node -->
+  <rect class="node-box q-box" x="330" y="20" width="270" height="70" />
+  <text class="type-label" x="346" y="42">? Question</text>
+  <text class="node-text" x="346" y="60">How to handle customers with</text>
+  <text class="node-text" x="346" y="75">low or unpredictable usage</text>
+
+  <!-- Stats bar -->
+  <text class="meta-text" x="20" y="130">2 nodes</text>
+  <text class="meta-text" x="100" y="130">0 edges</text>
+  <text class="meta-text" x="180" y="130">confidence: 0.50 (default)</text>
+</svg>

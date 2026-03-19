@@ -2,6 +2,8 @@
 
 Cairn maintains a persistent reasoning graph and uses a multi-stage pipeline to classify, resolve, and mutate cognitive events from text input.
 
+![The log is the truth. The graph is a view.](assets/log-and-graph.svg)
+
 ## Pipeline (per turn)
 
 ```

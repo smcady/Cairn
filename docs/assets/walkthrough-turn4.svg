@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 430" font-family="Inter, -apple-system, sans-serif">
+  <style>
+    .node-box { rx: 8; ry: 8; stroke-width: 1.5; }
+    .prop-box { fill: #FAFAFA; stroke: #888; }
+    .q-resolved-box { fill: #F5F5F5; stroke: #BBB; stroke-width: 1; }
+    .ev-box { fill: #F0F0F0; stroke: #AAA; stroke-width: 1; }
+    .obj-box { fill: #F0F0F0; stroke: #666; stroke-width: 1; }
+    .tension-box { fill: #F0F0F0; stroke: #777; stroke-width: 1.5; }
+    .synth-box { fill: #EBEBEB; stroke: #555; stroke-width: 2; }
+    .resolution-box { fill: #F5F5F5; stroke: #999; stroke-width: 1; }
+    .type-label { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; fill: #888; }
+    .type-label-dark { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; fill: #666; }
+    .type-label-synth { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; fill: #555; }
+    .node-text { font-size: 12px; font-weight: 500; fill: #333; }
+    .synth-text { font-size: 12px; font-weight: 600; fill: #333; }
+    .ev-text { font-size: 11px; font-weight: 500; fill: #666; }
+    .resolved-text { font-size: 11px; font-weight: 500; fill: #999; text-decoration: line-through; }
+    .meta-text { font-size: 10px; fill: #999; }
+    .conf-text { font-size: 10px; font-weight: 600; fill: #555; }
+    .edge-line { stroke-width: 1.5; fill: none; }
+    .edge-support { stroke: #888; }
+    .edge-contra { stroke: #555; }
+    .edge-between { stroke: #999; stroke-dasharray: 4,3; }
+    .edge-resolves { stroke: #666; }
+    .arrow-support { fill: #888; }
+    .arrow-contra { fill: #555; }
+    .arrow-resolves { fill: #666; }
+    .new-badge { font-size: 8px; font-weight: 700; fill: #FFFFFF; }
+    .new-badge-bg { fill: #555; rx: 3; ry: 3; }
+  </style>
+
+  <!-- LEFT SIDE: existing nodes (compact) -->
+
+  <!-- Proposition node -->
+  <rect class="node-box prop-box" x="20" y="20" width="280" height="65" />
+  <text class="type-label" x="36" y="40">Proposition</text>
+  <text class="node-text" x="36" y="56">Usage-based pricing aligns</text>
+  <text class="node-text" x="36" y="70">revenue with customer value</text>
+  <text class="conf-text" x="36" y="82" style="font-size: 9px;">conf: 0.53</text>
+
+  <!-- Supports edge -->
+  <line class="edge-line edge-support" x1="80" y1="85" x2="80" y2="105" />
+  <polygon class="arrow-support" points="76,103 80,111 84,103" />
+
+  <!-- Evidence node (compact) -->
+  <rect class="node-box ev-box" x="20" y="112" width="280" height="36" />
+  <text class="type-label" x="36" y="128">Evidence</text>
+  <text class="ev-text" x="110" y="128">40% revenue increase (0.70)</text>
+
+  <!-- Contradicts edge -->
+  <line class="edge-line edge-contra" x1="160" y1="85" x2="160" y2="165" />
+  <polygon class="arrow-contra" points="156,163 160,173 164,163" />
+
+  <!-- Objection node (compact) -->
+  <rect class="node-box obj-box" x="20" y="174" width="280" height="36" />
+  <text class="type-label-dark" x="36" y="190">Objection</text>
+  <text class="ev-text" x="110" y="190">Enterprise dealbreaker (0.55)</text>
+
+  <!-- Tension node -->
+  <rect class="node-box tension-box" x="20" y="235" width="280" height="40" />
+  <text class="type-label-dark" x="36" y="253">Tension (active)</text>
+  <text class="ev-text" x="155" y="253">usage vs. predictability</text>
+
+  <!-- Tension dashed connector -->
+  <line class="edge-line edge-between" x1="160" y1="210" x2="160" y2="235" />
+
+  <!-- Enterprise proposition (compact) -->
+  <rect class="node-box prop-box" x="20" y="295" width="280" height="45" />
+  <text class="type-label" x="36" y="312">Proposition</text>
+  <text class="node-text" x="36" y="328">Enterprise needs predictable pricing</text>
+  <text class="conf-text" x="250" y="312" style="font-size: 9px;">conf: 0.50</text>
+
+  <!-- Tension connector to enterprise -->
+  <line class="edge-line edge-between" x1="250" y1="275" x2="250" y2="295" />
+
+  <!-- RIGHT SIDE: new in turn 4 -->
+
+  <!-- NEW badge -->
+  <rect class="new-badge-bg" x="370" y="18" width="32" height="14" />
+  <text class="new-badge" x="376" y="28">NEW</text>
+
+  <!-- Synthesis node (prominent) -->
+  <rect class="node-box synth-box" x="370" y="36" width="290" height="72" />
+  <text class="type-label-synth" x="386" y="56">Synthesis</text>
+  <text class="synth-text" x="386" y="74">Hybrid: base platform fee +</text>
+  <text class="synth-text" x="386" y="89">usage overage above tier</text>
+  <text class="conf-text" x="386" y="102" style="font-size: 9px;">conf: 0.50 (new, untested)</text>
+
+  <!-- Resolves edge -->
+  <line class="edge-line edge-resolves" x1="515" y1="108" x2="515" y2="148" />
+  <polygon class="arrow-resolves" points="511,146 515,156 519,146" />
+  <text class="edge-label" x="527" y="134" style="font-size: 9px; font-weight: 600; fill: #666;">RESOLVES</text>
+
+  <!-- Question node (resolved) -->
+  <rect class="node-box q-resolved-box" x="370" y="158" width="290" height="55" />
+  <text class="type-label" x="386" y="177" style="fill: #BBB;">Question (resolved)</text>
+  <text class="resolved-text" x="386" y="195">How to handle customers with</text>
+  <text class="resolved-text" x="386" y="208">low or unpredictable usage</text>
+
+  <!-- Resolution edge -->
+  <line class="edge-line edge-resolves" x1="515" y1="213" x2="515" y2="240" />
+  <polygon class="arrow-resolves" points="511,238 515,248 519,238" />
+
+  <!-- Resolution node -->
+  <rect class="node-box resolution-box" x="370" y="250" width="290" height="55" />
+  <text class="type-label" x="386" y="269" style="fill: #999;">Resolution</text>
+  <text class="ev-text" x="386" y="287">Base tier = predictable minimum;</text>
+  <text class="ev-text" x="386" y="300">overage only above committed amount</text>
+
+  <!-- Stats bar -->
+  <text class="meta-text" x="20" y="380">8 nodes &#x00B7; 6 edges &#x00B7; 1 tension (active) &#x00B7; 1 question resolved</text>
+  <text class="meta-text" x="20" y="398">Synthesis proposed but untested (0.50). Original proposition still contested (0.53).</text>
+</svg>

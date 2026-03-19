@@ -10,6 +10,8 @@ AI memory stores content -- what was discussed, what was mentioned, what came up
 
 Cairn maintains a typed reasoning graph -- propositions, contradictions, refinements, syntheses, tensions -- with confidence scores and lifecycle status. An LLM with access to this graph knows *the state of your thinking*, not just a flat log of things you said.
 
+![Retrieval memory vs reasoning memory](docs/assets/retrieval-vs-reasoning.svg)
+
 ---
 
 ## Quick Start
@@ -89,6 +91,8 @@ Replace all `/path/to/` values with absolute paths.
 | `harness_trace(node_id)` | "How did we arrive at this position?" |
 
 ### What you'll see
+
+For a concrete example of what Cairn captures from a 4-turn pricing conversation, including classifier output, confidence changes, and tool responses, see [docs/walkthrough.md](docs/walkthrough.md).
 
 After a few conversations, `harness_status` returns the current state of your reasoning graph:
 
