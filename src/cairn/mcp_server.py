@@ -22,7 +22,7 @@ from mcp.server.fastmcp import FastMCP
 from cairn.memory.engine import MemoryEngine
 from cairn.models.events import EventLog, EventType
 from cairn.models.graph_types import IdeaGraph, NodeStatus
-from cairn.pipeline.mutator import replay_events
+from cairn.pipeline.mutator import apply_event
 from cairn.pipeline.renderer import ViewType, render_structured_summary
 from cairn.utils.vector_index import VectorIndex
 
@@ -69,7 +69,8 @@ def _get_engine() -> MemoryEngine:
     else:
         new_events = _engine.event_log.get_since(_last_event_id)
         if new_events:
-            replay_events(_engine.graph, new_events)
+            for event in new_events:
+                apply_event(_engine.graph, event, workspace_id=event.workspace_id)
             _last_event_id = new_events[-1].id
     return _engine
 

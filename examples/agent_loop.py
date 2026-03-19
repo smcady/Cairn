@@ -35,41 +35,20 @@ BASE_SYSTEM_PROMPT = (
 )
 
 
-async def orient_on_topic(engine, user_message: str) -> str:
+async def orient_on_topic(engine, user_message: str, db_path: str | None = None) -> str:
     """Search the graph for relevant prior reasoning. Returns summary or empty string."""
-    from cairn.models.graph_types import NodeStatus
-    from cairn.pipeline.renderer import ViewType, render_structured_summary
-
-    if engine.graph.node_count() == 0:
-        return ""
-
-    results = await engine.search_nodes(user_message, k=5)
-    active = [(n, s) for n, s in results if n.status == NodeStatus.ACTIVE]
-    if not active:
-        return ""
-
-    focus_ids = [n.id for n, _ in active]
-    summary = render_structured_summary(
-        engine.graph,
-        ViewType.ORIENT,
-        focus_node_ids=focus_ids,
-        topic=user_message[:100],
-    )
-
-    if not summary or "No relevant" in summary:
-        return ""
-
-    return summary
+    import cairn
+    return await cairn.orient(user_message, k=5, db_path=db_path)
 
 
 async def run_turn(
     client,
-    engine,
     user_message: str,
     conversation_history: list[dict],
+    db_path: str | None = None,
 ) -> str:
     """Run one turn: orient, inject context, call API, return response."""
-    context = await orient_on_topic(engine, user_message)
+    context = await orient_on_topic(None, user_message, db_path=db_path)
 
     system = BASE_SYSTEM_PROMPT
     if context:
@@ -94,12 +73,11 @@ async def run_turn(
 async def run_interactive(db_path: str) -> None:
     """Interactive mode: read from stdin, respond, repeat."""
     import cairn
-    from cairn._engine_registry import get_engine
     from cairn.integrations.anthropic import AsyncAnthropic
 
     cairn.init(db_path=db_path)
     client = AsyncAnthropic()
-    engine = get_engine(db_path)
+    engine = cairn.get_engine(db_path)
     history: list[dict] = []
 
     print("Cairn agent loop (type 'quit' to exit)")
@@ -116,7 +94,7 @@ async def run_interactive(db_path: str) -> None:
         if not user_input or user_input.lower() == "quit":
             break
 
-        response = await run_turn(client, engine, user_input, history)
+        response = await run_turn(client, user_input, history, db_path=db_path)
         print(f"Assistant: {response}\n")
 
 
@@ -126,12 +104,11 @@ async def run_fixture(fixture_path: str, db_path: str) -> dict:
     from conversation_loader import load_conversation
 
     import cairn
-    from cairn._engine_registry import get_engine
     from cairn.integrations.anthropic import AsyncAnthropic
 
     cairn.init(db_path=db_path)
     client = AsyncAnthropic()
-    engine = get_engine(db_path)
+    engine = cairn.get_engine(db_path)
     history: list[dict] = []
 
     conv = load_conversation(Path(fixture_path))
@@ -140,14 +117,14 @@ async def run_fixture(fixture_path: str, db_path: str) -> dict:
     orient_results = []
 
     for i, turn in enumerate(conv.turns, 1):
-        context = await orient_on_topic(engine, turn.user)
+        context = await orient_on_topic(None, turn.user, db_path=db_path)
         orient_results.append(bool(context))
         if context:
             print(f"  Turn {i}: [oriented] {turn.user[:60]}...")
         else:
             print(f"  Turn {i}: {turn.user[:60]}...")
 
-        response = await run_turn(client, engine, turn.user, history)
+        response = await run_turn(client, turn.user, history, db_path=db_path)
         print(f"  Response: {response[:80]}...")
 
         # Give background ingest time to complete before next turn
@@ -157,7 +134,7 @@ async def run_fixture(fixture_path: str, db_path: str) -> dict:
     await asyncio.sleep(3)
 
     # Refresh engine to see ingested events
-    engine = get_engine(db_path)
+    engine = cairn.get_engine(db_path)
     stats = engine.get_stats()
     print(f"\nGraph after: {stats['total_nodes']} nodes, {stats['total_edges']} edges, {stats['total_events']} events")
     print(f"Orient fired on turns: {[i+1 for i, r in enumerate(orient_results) if r]}")

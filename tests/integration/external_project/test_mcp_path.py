@@ -12,6 +12,8 @@ import re
 import sys
 from pathlib import Path
 
+import pytest
+
 from dotenv import load_dotenv
 # Project root is three levels up from tests/integration/external_project/
 _PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
@@ -27,7 +29,7 @@ def finding(msg: str) -> None:
     print(f"  [FINDING] {msg}")
 
 
-async def test_empty_status(status_fn):
+async def check_empty_status(status_fn):
     """Verify harness_status works on an empty graph."""
     print("\n--- Testing harness_status on empty graph ---")
     try:
@@ -39,7 +41,7 @@ async def test_empty_status(status_fn):
         finding(f"harness_status failed on empty graph: {e}")
 
 
-async def test_query_views(query_fn):
+async def check_query_views(query_fn):
     """Verify all harness_query views return non-trivial output."""
     print("\n--- Testing harness_query views ---")
     views = ["current_state", "disagreement_map", "coverage_report", "decision_log"]
@@ -58,7 +60,7 @@ async def test_query_views(query_fn):
         finding("harness_query with invalid view doesn't return clear error")
 
 
-async def test_trace(search_fn, trace_fn):
+async def check_trace(search_fn, trace_fn):
     """Verify harness_trace works for a discovered node."""
     print("\n--- Testing harness_trace ---")
     try:
@@ -79,7 +81,7 @@ async def test_trace(search_fn, trace_fn):
         finding("harness_trace with invalid node_id doesn't return clear error")
 
 
-async def test_debug(debug_fn):
+async def check_debug(debug_fn):
     """Verify harness_debug returns valid JSON with expected structure."""
     print("\n--- Testing harness_debug ---")
     try:
@@ -186,7 +188,7 @@ async def main():
         return
 
     # Test empty state
-    await test_empty_status(status)
+    await check_empty_status(status)
 
     # Ingest all conversations
     for conv in conversations:
@@ -200,9 +202,9 @@ async def main():
     result = status()
     print(f"\n   Status after all ingests: {len(result)} chars")
 
-    await test_query_views(query)
-    await test_trace(search, trace)
-    await test_debug(debug)
+    await check_query_views(query)
+    await check_trace(search, trace)
+    await check_debug(debug)
 
     # Validate each conversation's assertions
     print("\n" + "=" * 60)
@@ -226,6 +228,14 @@ async def main():
     for f in [db_path, f"{db_path}-shm", f"{db_path}-wal"]:
         if os.path.exists(f):
             os.remove(f)
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_mcp_full_pipeline():
+    """Pytest-collected wrapper: run full MCP pipeline and assert no findings."""
+    await main()
+    assert not FINDINGS, f"MCP pipeline had {len(FINDINGS)} findings:\n" + "\n".join(FINDINGS)
 
 
 if __name__ == "__main__":

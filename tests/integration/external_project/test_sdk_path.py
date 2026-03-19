@@ -9,6 +9,8 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
+
 from dotenv import load_dotenv
 # Project root is three levels up from tests/integration/external_project/
 _PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
@@ -175,6 +177,14 @@ async def main():
     for f in [db_path, f"{db_path}-shm", f"{db_path}-wal"]:
         if os.path.exists(f):
             os.remove(f)
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_sdk_full_pipeline():
+    """Pytest-collected wrapper: run full SDK pipeline and assert no findings."""
+    await main()
+    assert not FINDINGS, f"SDK pipeline had {len(FINDINGS)} findings:\n" + "\n".join(FINDINGS)
 
 
 if __name__ == "__main__":
