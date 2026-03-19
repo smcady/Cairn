@@ -127,6 +127,27 @@ class TestConfigureHooks:
         # Cairn hook added
         assert any("hook_ingest.py" in h["hooks"][0]["command"] for h in settings["hooks"]["Stop"])
 
+    def test_quotes_paths_with_spaces(self, tmp_path):
+        """Paths containing spaces are properly quoted in hook commands."""
+        project = tmp_path / "my project"
+        project.mkdir()
+        root_dir = tmp_path / "cairn install"
+        (root_dir / "scripts").mkdir(parents=True)
+        (root_dir / "scripts" / "hook_ingest.py").touch()
+        (root_dir / "scripts" / "hook_orient.py").touch()
+        (root_dir / ".venv" / "bin").mkdir(parents=True)
+        (root_dir / ".venv" / "bin" / "python").touch()
+        venv_python = root_dir / ".venv" / "bin" / "python"
+        db_path = project / "cairn.db"
+
+        _configure_hooks(project, venv_python, root_dir, db_path)
+
+        settings = _load_json(project / ".claude" / "settings.json")
+        stop_cmd = settings["hooks"]["Stop"][0]["hooks"][0]["command"]
+        # Python path and script path should be quoted
+        assert f'"{venv_python}"' in stop_cmd
+        assert '"' + str(root_dir / "scripts" / "hook_ingest.py") + '"' in stop_cmd
+
     def test_idempotent(self, tmp_path):
         """Running twice doesn't duplicate hooks."""
         project = tmp_path / "project"

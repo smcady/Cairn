@@ -35,6 +35,12 @@ IMPORTANT RULES:
 - REFINEMENT means the same idea is made more precise. If the meaning changes substantially, it's a NEW_PROPOSITION that relates to the original.
 - SYNTHESIS requires pulling together 2+ distinct threads into something new. Don't classify simple agreement as synthesis.
 
+IMPLICIT CONTRADICTIONS:
+When new evidence or data undermines an existing proposition, emit a CONTRADICTION even if the speaker frames it as support for an alternative rather than an attack on the original. Example: if someone proposes microservices to fix deployments, and someone else shows data that 80% of deployments only touch one module (suggesting the problem is CI, not architecture), that data CONTRADICTS the microservices proposition even though the speaker framed it as support for "fix CI instead." The test: does this evidence, if true, weaken the case for the existing proposition? If yes, it's a CONTRADICTION of that proposition AND potentially a SUPPORT or NEW_PROPOSITION for the alternative.
+
+IMPLICIT RESOLUTIONS:
+When a conversation reaches clear consensus or a decision is made, emit QUESTION_RESOLVED even if nobody explicitly says "to answer the earlier question." Look for signals like: "let's go with X," "decided: X," "that settles it," or a synthesis that clearly answers an open question. If a question was raised earlier and the conversation has moved past it with a clear answer, resolve it.
+
 Event types and their payload fields (* = node description, not an ID):
 - NEW_PROPOSITION: {text, source, related_node_descriptions*[]}
 - SUPPORT: {target_node_description*, evidence_text, source}

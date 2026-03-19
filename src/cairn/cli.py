@@ -81,8 +81,8 @@ def _configure_hooks(project_dir: Path, venv_python: Path, cairn_root: Path, db_
     hook_ingest = cairn_root / "scripts" / "hook_ingest.py"
     hook_orient = cairn_root / "scripts" / "hook_orient.py"
 
-    stop_command = f'CAIRN_DB="{db_path}" {venv_python} {hook_ingest}'
-    orient_command = f'CAIRN_DB="{db_path}" {venv_python} {hook_orient}'
+    stop_command = f'CAIRN_DB="{db_path}" "{venv_python}" "{hook_ingest}"'
+    orient_command = f'CAIRN_DB="{db_path}" "{venv_python}" "{hook_orient}"'
 
     # Build the hook entries
     stop_hook = {

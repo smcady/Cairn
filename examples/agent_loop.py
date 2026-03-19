@@ -12,7 +12,8 @@ Usage:
   Interactive:  python examples/agent_loop.py
   From fixture: python examples/agent_loop.py --fixture path/to/conversation.yaml
 
-Requires ANTHROPIC_API_KEY and VOYAGE_API_KEY in .env.local or environment.
+Requires ANTHROPIC_API_KEY in .env.local or environment.
+VOYAGE_API_KEY is optional (improves embedding quality; falls back to local fastembed).
 """
 
 from __future__ import annotations
