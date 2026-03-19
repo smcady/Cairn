@@ -1,0 +1,66 @@
+id: saas_churn_analysis
+description: >
+  Four-turn churn analysis discussion. Starts with hypothesis that onboarding
+  is the problem, gets contradicted by cohort data showing month-3 drop-off,
+  raises question about feature adoption correlation, resolves with engagement
+  scoring approach. Tests contradiction with empirical data and question resolution.
+domain: business_strategy
+
+turns:
+  - user: >
+      Our churn is at 8% monthly and it's killing our growth. I think the
+      problem is onboarding -- we're losing people in the first two weeks
+      because the setup is too complex. Three of our last five churned
+      customers mentioned setup difficulty in their exit surveys.
+    assistant: >
+      8% monthly churn is high for SaaS. The exit survey signal is worth
+      investigating, but five responses is a small sample. Do you have
+      cohort data that shows where in the lifecycle customers actually drop off?
+
+  - user: >
+      I pulled the cohort data and it actually contradicts my assumption.
+      First-month retention is 94%, which is decent. The real cliff is
+      month 3 -- we drop from 88% to 71% between months 2 and 3. So
+      onboarding isn't the main problem. Something happens after they've
+      been using the product for a while.
+    assistant: >
+      That's a significant finding. A month-3 cliff typically points to
+      customers exhausting initial use cases without discovering deeper
+      value. The onboarding gets them started, but the product isn't
+      sticky enough to retain them past the novelty period.
+
+  - user: >
+      Is there a correlation between feature adoption depth and retention?
+      If customers who use more than 3 features have significantly better
+      month-3 retention, that would confirm the depth-of-value hypothesis
+      and give us something actionable to work with.
+    assistant: >
+      That's the right analysis to run. If you can segment your month-3
+      cohort by feature adoption count and show a retention curve, you'll
+      know whether it's a discovery problem or a product gap.
+
+  - user: >
+      We ran the analysis. Customers using 4+ features have 91% month-3
+      retention vs 62% for those using 1-2 features. The answer is an
+      engagement scoring system -- track feature adoption and trigger
+      proactive outreach when customers plateau at 1-2 features before
+      they hit the month-3 cliff.
+    assistant: >
+      The data is clear. 91% vs 62% is a massive gap. An engagement
+      scoring system that flags at-risk customers based on feature
+      adoption depth gives your CS team a concrete intervention point
+      before churn happens.
+
+assertions:
+  min_nodes: 4
+  has_superseded: true
+  search_queries:
+    - query: "churn onboarding"
+      min_results: 1
+    - query: "month 3 retention cliff"
+      min_results: 1
+    - query: "feature adoption engagement scoring"
+      min_results: 1
+  orient_topics:
+    - topic: "churn analysis and retention"
+      must_not_be_empty: true

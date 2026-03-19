@@ -44,17 +44,25 @@ def _build_current_state_summary(graph: IdeaGraph, workspace_id: str | None = No
     if propositions:
         lines = ["## Active Propositions"]
         for p in sorted(propositions, key=lambda x: x.confidence, reverse=True):
-            support_count = sum(
-                1 for _, _, e in graph.get_edges_for_node(p.id, "in")
+            support_edges = [
+                e for _, _, e in graph.get_edges_for_node(p.id, "in")
                 if e.type == EdgeType.SUPPORTS
-            )
-            contradiction_count = sum(
-                1 for _, _, e in graph.get_edges_for_node(p.id, "in")
+            ]
+            contradiction_edges = [
+                e for _, _, e in graph.get_edges_for_node(p.id, "in")
                 if e.type == EdgeType.CONTRADICTS
-            )
+            ]
+            support_str = str(len(support_edges))
+            if support_edges:
+                max_s = max(e.strength for e in support_edges)
+                support_str += f", strongest: {max_s:.1f}"
+            challenge_str = str(len(contradiction_edges))
+            if contradiction_edges:
+                max_c = max(e.strength for e in contradiction_edges)
+                challenge_str += f", strongest: {max_c:.1f}"
             lines.append(
                 f"- [{p.id}] (confidence: {p.confidence:.1f}, "
-                f"support: {support_count}, challenges: {contradiction_count}, "
+                f"support: {support_str}, challenges: {challenge_str}, "
                 f"depth: {p.depth_of_exploration}) {p.text}"
             )
         sections.append("\n".join(lines))
@@ -340,8 +348,16 @@ def _build_orient_summary(graph: IdeaGraph, focus_node_ids: list[str], topic: st
 
     if settled:
         lines.append("\nSETTLED")
-        for node in settled:
-            lines.append(f"• {_trunc(node.text)}")
+        for node in sorted(settled, key=lambda x: x.confidence, reverse=True):
+            support_edges = [
+                e for _, _, e in graph.get_edges_for_node(node.id, "in")
+                if e.type == EdgeType.SUPPORTS
+            ]
+            if support_edges and node.confidence > 0.5:
+                max_s = max(e.strength for e in support_edges)
+                lines.append(f"• {_trunc(node.text)} (confidence: {node.confidence:.1f}, strongest evidence: {max_s:.1f})")
+            else:
+                lines.append(f"• {_trunc(node.text)}")
 
     if contested:
         lines.append("\nCONTESTED")

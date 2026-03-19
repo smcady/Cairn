@@ -1,0 +1,84 @@
+id: domain_shift
+description: >
+  Five-turn conversation that shifts domains: starts with technical database
+  architecture (PostgreSQL vs DynamoDB), shifts to cost-per-query pricing
+  implications, then to margin targets and business viability. Tests whether
+  the classifier handles fuzzy domain boundaries -- events from a single
+  conversation should span software_engineering, saas_pricing, and
+  business_strategy domains.
+domain: mixed
+
+turns:
+  - user: >
+      We need to decide between PostgreSQL and DynamoDB for our analytics
+      pipeline. Postgres gives us full SQL, joins, and our team already
+      knows it. DynamoDB scales horizontally without operational overhead
+      but forces us into a single-table design pattern that's harder to
+      evolve.
+    assistant: >
+      Both are defensible choices. PostgreSQL gives you query flexibility
+      and team familiarity, but you'll hit scaling walls on analytical
+      workloads at a certain data volume. DynamoDB gives you effectively
+      unlimited scale but the single-table pattern imposes upfront design
+      constraints that are painful to change later.
+
+  - user: >
+      Our data volume is growing 40% month over month. We're at 2TB now
+      and expect to hit 15TB within 6 months. PostgreSQL can handle that
+      with partitioning and read replicas, but the operational cost of
+      managing that infrastructure is real -- we'd probably need a
+      dedicated DBA or at minimum 20% of an engineer's time.
+    assistant: >
+      At 15TB with 40% growth, you're on a trajectory where PostgreSQL
+      operational overhead compounds. DynamoDB's managed scaling removes
+      that operational burden entirely, which matters a lot when you're
+      growing that fast and engineering time is your scarcest resource.
+
+  - user: >
+      Here's where it gets complicated. Our pricing model charges per
+      query, and DynamoDB's cost per read is 3x higher than PostgreSQL
+      for complex analytical queries because of the scan patterns. At
+      our projected query volume, that's $8K/month more in infrastructure
+      cost -- which directly eats into our per-query margin.
+    assistant: >
+      That shifts the calculus significantly. A $8K/month infrastructure
+      delta at scale is material. If your per-query price point is set
+      to deliver healthy margins on PostgreSQL costs, DynamoDB could push
+      you below viable margins on your highest-volume customers.
+
+  - user: >
+      Exactly. Our target gross margin is 75%. With PostgreSQL
+      infrastructure costs, we hit 78% gross margin on the analytics
+      product. With DynamoDB, that drops to 68% -- below our target
+      and below what investors expect for a SaaS analytics product
+      at our stage.
+    assistant: >
+      68% gross margin is a problem for fundraising. Most SaaS investors
+      want to see 70%+ and trending upward. Below that, you either need
+      to raise your per-query price (which affects competitiveness) or
+      accept a structural margin disadvantage.
+
+  - user: >
+      Decision: PostgreSQL with partitioning and a managed service like
+      RDS or Aurora. We accept the operational complexity in exchange for
+      margins that hit our 75% target. We'll budget 20% of an SRE's time
+      for database operations and revisit if we cross 50TB, which is
+      roughly 18 months out at current growth.
+    assistant: >
+      Solid decision. PostgreSQL on Aurora gives you managed infrastructure
+      that reduces the operational burden while maintaining cost efficiency.
+      The 50TB checkpoint gives you a clear re-evaluation trigger rather
+      than an open-ended commitment.
+
+assertions:
+  min_nodes: 4
+  search_queries:
+    - query: "PostgreSQL vs DynamoDB database choice"
+      min_results: 1
+    - query: "cost per query infrastructure margin"
+      min_results: 1
+    - query: "gross margin SaaS target 75%"
+      min_results: 1
+  orient_topics:
+    - topic: "database architecture and pricing implications"
+      must_not_be_empty: true

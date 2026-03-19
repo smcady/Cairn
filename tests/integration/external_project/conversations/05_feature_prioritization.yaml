@@ -1,0 +1,67 @@
+id: feature_prioritization
+description: >
+  Four-turn feature prioritization debate. AI-powered recommendations vs
+  manual CSV export. Recommendations get data-backed support (usage analytics),
+  CSV export gets abandoned when usage data shows low demand. Tests support
+  with quantitative evidence and abandonment.
+domain: product_design
+
+turns:
+  - user: >
+      We need to decide between two features for Q2: AI-powered
+      recommendations and bulk CSV export. Both have been requested but
+      we can only ship one this quarter given our team size.
+    assistant: >
+      What signals do you have on relative demand? Feature requests alone
+      don't tell you impact -- a few vocal enterprise customers requesting
+      CSV export might be louder than the broader user base that would
+      benefit from recommendations.
+
+  - user: >
+      Good point. I looked at our product analytics. 73% of users browse
+      more than 20 items per session but only engage with 3-4. That's a
+      massive discovery gap that recommendations would directly address.
+      The CSV export was requested by 12 customers in the last quarter,
+      but when I checked their usage, 8 of them already use our API for
+      the same workflow.
+    assistant: >
+      The data strongly favors recommendations. A 73% browse-to-engage
+      gap is a core product problem, not a nice-to-have. And if 8 of 12
+      CSV requesters already have a workaround via the API, the actual
+      unserved demand is just 4 customers.
+
+  - user: >
+      The CSV export also has implementation risk. Our data model has
+      gotten complex with the new entity relationships, and a reliable
+      export would need to handle circular references, large datasets,
+      and custom field types. The estimate ballooned from 2 weeks to
+      6 weeks when engineering scoped it properly.
+    assistant: >
+      That's a 3x scope increase, which changes the ROI calculation
+      entirely. Six weeks for 4 genuinely unserved customers is a poor
+      trade compared to six weeks on a feature that addresses a gap
+      affecting 73% of your user base.
+
+  - user: >
+      Agreed. We're shelving CSV export. It's not dead forever -- if we
+      see API adoption drop or more customers ask for it without a
+      workaround, we'll revisit. But Q2 is recommendations. The
+      discovery gap is the higher-leverage problem.
+    assistant: >
+      Good call. Recommendations for Q2, CSV export parked with clear
+      re-evaluation criteria. The analytics data made this a
+      straightforward decision once you looked at actual usage patterns
+      instead of just request counts.
+
+assertions:
+  min_nodes: 3
+  search_queries:
+    - query: "AI recommendations feature"
+      min_results: 1
+    - query: "CSV export demand"
+      min_results: 1
+    - query: "browse to engage discovery gap"
+      min_results: 1
+  orient_topics:
+    - topic: "feature prioritization Q2"
+      must_not_be_empty: true

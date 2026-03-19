@@ -66,8 +66,8 @@ _OPTIONAL_LIST: dict[EventType, tuple[str, str]] = {
 # Non-reference payload fields to copy directly from ClassifiedEvent
 _PLAIN_FIELDS: dict[EventType, list[str]] = {
     EventType.NEW_PROPOSITION:      ["text", "source"],
-    EventType.SUPPORT:              ["evidence_text", "source"],
-    EventType.CONTRADICTION:        ["objection_text", "source"],
+    EventType.SUPPORT:              ["evidence_text", "source", "evidence_strength"],
+    EventType.CONTRADICTION:        ["objection_text", "source", "evidence_strength"],
     EventType.REFINEMENT:           ["new_text", "source"],
     EventType.NEW_QUESTION:         ["text", "source"],
     EventType.QUESTION_RESOLVED:    ["resolution_text", "source"],

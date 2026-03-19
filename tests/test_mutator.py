@@ -392,3 +392,133 @@ class TestAbandonment:
 
         assert "prop1" in result.modified_node_ids
         assert graph_with_proposition.get_node("prop1").status == NodeStatus.PARKED
+
+
+class TestEvidenceStrength:
+    """Tests for variable confidence deltas based on evidence_strength."""
+
+    def test_strong_support_large_delta(self, graph_with_proposition):
+        event = _make_event(EventType.SUPPORT, {
+            "target_node_id": "prop1",
+            "evidence_text": "Benchmark shows 3x improvement",
+            "source": "user",
+            "evidence_strength": 0.8,
+        })
+        apply_event(graph_with_proposition, event)
+
+        prop = graph_with_proposition.get_node("prop1")
+        # 0.5 + (0.8 * 0.2) = 0.5 + 0.16 = 0.66
+        assert abs(prop.confidence - 0.66) < 0.001
+
+    def test_weak_support_small_delta(self, graph_with_proposition):
+        event = _make_event(EventType.SUPPORT, {
+            "target_node_id": "prop1",
+            "evidence_text": "I think this is probably true",
+            "source": "user",
+            "evidence_strength": 0.1,
+        })
+        apply_event(graph_with_proposition, event)
+
+        prop = graph_with_proposition.get_node("prop1")
+        # 0.5 + (0.1 * 0.2) = 0.5 + 0.02 = 0.52
+        assert abs(prop.confidence - 0.52) < 0.001
+
+    def test_strong_contradiction_large_delta(self, graph_with_proposition):
+        event = _make_event(EventType.CONTRADICTION, {
+            "target_node_id": "prop1",
+            "objection_text": "Data shows 91% vs 62% retention gap",
+            "source": "user",
+            "evidence_strength": 0.8,
+        })
+        apply_event(graph_with_proposition, event)
+
+        prop = graph_with_proposition.get_node("prop1")
+        # 0.5 - (0.8 * 0.2) = 0.5 - 0.16 = 0.34
+        assert abs(prop.confidence - 0.34) < 0.001
+
+    def test_weak_contradiction_small_delta(self, graph_with_proposition):
+        event = _make_event(EventType.CONTRADICTION, {
+            "target_node_id": "prop1",
+            "objection_text": "I disagree",
+            "source": "user",
+            "evidence_strength": 0.2,
+        })
+        apply_event(graph_with_proposition, event)
+
+        prop = graph_with_proposition.get_node("prop1")
+        # 0.5 - (0.2 * 0.2) = 0.5 - 0.04 = 0.46
+        assert abs(prop.confidence - 0.46) < 0.001
+
+    def test_default_strength_preserves_old_behavior(self, graph_with_proposition):
+        """Default evidence_strength=0.5 produces delta of 0.1, same as old fixed behavior."""
+        event = _make_event(EventType.SUPPORT, {
+            "target_node_id": "prop1",
+            "evidence_text": "Some evidence",
+            "source": "user",
+            # no evidence_strength = defaults to 0.5
+        })
+        apply_event(graph_with_proposition, event)
+
+        prop = graph_with_proposition.get_node("prop1")
+        # 0.5 + (0.5 * 0.2) = 0.5 + 0.1 = 0.6
+        assert prop.confidence == 0.6
+
+    def test_edge_strength_set_from_evidence_strength(self, graph_with_proposition):
+        event = _make_event(EventType.SUPPORT, {
+            "target_node_id": "prop1",
+            "evidence_text": "Strong data",
+            "source": "user",
+            "evidence_strength": 0.75,
+        })
+        result = apply_event(graph_with_proposition, event)
+
+        evidence_id = result.created_node_ids[0]
+        edges = graph_with_proposition.get_edges(evidence_id, "prop1")
+        assert len(edges) == 1
+        assert edges[0].type == EdgeType.SUPPORTS
+        assert edges[0].strength == 0.75
+
+    def test_contradiction_edge_strength_set(self, graph_with_proposition):
+        event = _make_event(EventType.CONTRADICTION, {
+            "target_node_id": "prop1",
+            "objection_text": "Counter evidence",
+            "source": "user",
+            "evidence_strength": 0.6,
+        })
+        result = apply_event(graph_with_proposition, event)
+
+        objection_id = result.created_node_ids[0]
+        edges = graph_with_proposition.get_edges(objection_id, "prop1")
+        assert len(edges) == 1
+        assert edges[0].type == EdgeType.CONTRADICTS
+        assert edges[0].strength == 0.6
+
+    def test_max_strength_support_caps_at_09(self, graph):
+        node = GraphNode(id="high", type=NodeType.PROPOSITION, text="Strong claim", confidence=0.8)
+        graph.add_node(node)
+
+        event = _make_event(EventType.SUPPORT, {
+            "target_node_id": "high",
+            "evidence_text": "Proven result",
+            "source": "user",
+            "evidence_strength": 1.0,
+        })
+        apply_event(graph, event)
+
+        # 0.8 + (1.0 * 0.2) = 1.0 -> capped at 0.9
+        assert graph.get_node("high").confidence == 0.9
+
+    def test_max_strength_contradiction_floors_at_01(self, graph):
+        node = GraphNode(id="weak", type=NodeType.PROPOSITION, text="Weak claim", confidence=0.2)
+        graph.add_node(node)
+
+        event = _make_event(EventType.CONTRADICTION, {
+            "target_node_id": "weak",
+            "objection_text": "Definitive disproof",
+            "source": "user",
+            "evidence_strength": 1.0,
+        })
+        apply_event(graph, event)
+
+        # 0.2 - (1.0 * 0.2) = 0.0 -> floored at 0.1
+        assert graph.get_node("weak").confidence == 0.1

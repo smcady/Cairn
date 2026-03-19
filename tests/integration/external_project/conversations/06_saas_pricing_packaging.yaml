@@ -1,0 +1,84 @@
+id: saas_pricing_packaging
+description: >
+  Five-turn pricing model discussion for a SaaS product. Explores flat-rate vs
+  tiered vs usage-based with real MRR/LTV numbers. Enterprise objection to
+  usage-based, synthesis into hybrid model with seat-based enterprise tier and
+  usage-based self-serve. Tests multiple contradictions, support with financial
+  data, and synthesis.
+domain: saas_pricing
+
+turns:
+  - user: >
+      We need to rethink our pricing. We're at $85K MRR on a flat $99/month
+      plan and growth has stalled. Our power users process 50x more data
+      than casual users but pay the same price. We're leaving money on
+      the table and subsidizing light users at the expense of heavy ones.
+    assistant: >
+      Flat-rate pricing has diminishing returns once you have product-market
+      fit. The 50x usage variance is a strong signal that value-based
+      pricing could capture significantly more revenue from power users
+      without raising prices on your broader base.
+
+  - user: >
+      I'm thinking pure usage-based pricing. Charge per API call or per
+      GB processed. It aligns revenue directly with value delivered and
+      our margins are actually better on high-volume customers because
+      of infrastructure efficiencies at scale.
+    assistant: >
+      Usage-based has strong unit economics alignment. If your cost per
+      unit decreases at scale while customer value per unit stays constant,
+      your margin expands as customers grow. That's an attractive model
+      for both you and investors.
+
+  - user: >
+      I talked to our three enterprise prospects and they pushed back hard.
+      Their procurement teams need annual budget commitments -- they can't
+      sign off on variable costs that could swing 40% month to month based
+      on usage. One of them said it's literally a non-starter for their
+      finance team. These are $30K+ ACV deals we'd be walking away from.
+    assistant: >
+      That's a real constraint. Enterprise procurement processes are
+      built around predictable annual budgets. Variable pricing creates
+      friction that no amount of product quality can overcome in those
+      orgs. And at $30K+ ACV, those are exactly the customers you want.
+
+  - user: >
+      What if we look at our actual data? Our average self-serve customer
+      has an LTV of $1,400 on the flat plan. But I modeled usage-based
+      pricing against their actual consumption patterns and the projected
+      LTV jumps to $2,100 -- a 50% increase -- because power users would
+      pay proportionally more. The bottom 30% of users would actually
+      pay less than $99/month, which helps acquisition.
+    assistant: >
+      A 50% LTV increase on self-serve while lowering the entry price is
+      a compelling model. The lower floor reduces acquisition friction and
+      the usage scaling captures the value gap from power users. That's
+      a strong quantitative case for the self-serve segment specifically.
+
+  - user: >
+      OK here's the synthesis: two-track pricing. Self-serve gets usage-based
+      pricing with a low entry point -- projected $2,100 LTV based on our
+      data. Enterprise gets seat-based annual contracts starting at $30K ACV
+      with committed usage tiers -- predictable for procurement, premium
+      for us. We serve both segments without forcing one model to fit everyone.
+    assistant: >
+      The two-track model resolves the tension cleanly. Usage-based
+      captures the self-serve value gap you identified, seat-based annual
+      contracts meet enterprise procurement requirements. Each segment
+      gets the pricing model that matches their buying behavior.
+
+assertions:
+  min_nodes: 4
+  has_superseded: true
+  search_queries:
+    - query: "pricing model flat rate usage based"
+      min_results: 1
+    - query: "enterprise procurement budget predictability"
+      min_results: 1
+    - query: "LTV usage based self serve"
+      min_results: 1
+    - query: "two track pricing hybrid model"
+      min_results: 1
+  orient_topics:
+    - topic: "SaaS pricing strategy"
+      must_not_be_empty: true

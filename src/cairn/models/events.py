@@ -43,6 +43,7 @@ class SupportPayload(BaseModel):
     evidence_text: str
     source: str = "user"
     evidence_node_id: str = ""  # pre-assigned by engine
+    evidence_strength: float = 0.5  # 0.0-1.0 scale from classifier
 
 
 class ContradictionPayload(BaseModel):
@@ -50,6 +51,7 @@ class ContradictionPayload(BaseModel):
     objection_text: str
     source: str = "user"
     objection_node_id: str = ""  # pre-assigned by engine
+    evidence_strength: float = 0.5  # 0.0-1.0 scale from classifier
 
 
 class RefinementPayload(BaseModel):
@@ -241,6 +243,14 @@ class ClassifiedEvent(BaseModel):
 
     # ABANDONMENT
     reason: str = Field(default="", description="Reason for abandonment. Used by ABANDONMENT.")
+
+    # Evidence strength (SUPPORT and CONTRADICTION only)
+    evidence_strength: float = Field(default=0.5, ge=0.0, le=1.0, description=(
+        "Strength of evidence for SUPPORT or CONTRADICTION events. "
+        "Scale: 0.0-0.2 (anecdote/opinion), 0.2-0.4 (authority claim), "
+        "0.4-0.6 (logical argument), 0.6-0.8 (empirical/quantitative data), "
+        "0.8-1.0 (proven/replicated result). Default 0.5 for non-evidence events."
+    ))
 
 
 # --- EventLog with SQLite persistence ---

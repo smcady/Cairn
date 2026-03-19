@@ -110,11 +110,14 @@ def _handle_support(graph: IdeaGraph, event: Event, workspace_id: str = "") -> M
     graph.add_node(evidence)
     result.created_node_ids.append(evidence.id)
 
-    edge = GraphEdge(type=EdgeType.SUPPORTS, timestamp=event.timestamp)
+    strength = payload.evidence_strength
+    edge = GraphEdge(type=EdgeType.SUPPORTS, strength=strength, timestamp=event.timestamp)
     graph.add_edge(evidence.id, payload.target_node_id, edge)
     result.created_edges.append((evidence.id, payload.target_node_id, EdgeType.SUPPORTS))
 
-    new_confidence = min(0.9, target.confidence + 0.1)
+    max_delta = 0.2
+    delta = strength * max_delta
+    new_confidence = min(0.9, target.confidence + delta)
     graph.update_node(payload.target_node_id, confidence=new_confidence)
     result.modified_node_ids.append(payload.target_node_id)
 
@@ -140,11 +143,14 @@ def _handle_contradiction(graph: IdeaGraph, event: Event, workspace_id: str = ""
     graph.add_node(objection)
     result.created_node_ids.append(objection.id)
 
-    edge = GraphEdge(type=EdgeType.CONTRADICTS, timestamp=event.timestamp)
+    strength = payload.evidence_strength
+    edge = GraphEdge(type=EdgeType.CONTRADICTS, strength=strength, timestamp=event.timestamp)
     graph.add_edge(objection.id, payload.target_node_id, edge)
     result.created_edges.append((objection.id, payload.target_node_id, EdgeType.CONTRADICTS))
 
-    new_confidence = max(0.1, target.confidence - 0.1)
+    max_delta = 0.2
+    delta = strength * max_delta
+    new_confidence = max(0.1, target.confidence - delta)
     graph.update_node(payload.target_node_id, confidence=new_confidence)
     result.modified_node_ids.append(payload.target_node_id)
 

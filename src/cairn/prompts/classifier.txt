@@ -17,6 +17,16 @@ Skip ephemeral conversational mechanics that carry no durable meaning on their o
 
 An exchange that is purely conversational (greetings, acknowledgments, clarifying questions about immediate next steps, status updates with no lasting implications) should produce ZERO events. Producing no events is a valid and expected outcome.
 
+EVIDENCE STRENGTH (for SUPPORT and CONTRADICTION only):
+When you identify a SUPPORT or CONTRADICTION event, assess the strength of the
+evidence on a 0.0-1.0 scale and set evidence_strength accordingly:
+  0.0-0.2: Anecdote, personal opinion, vague agreement/disagreement, "I think..."
+  0.2-0.4: Authority claim ("experts say...", "best practice is..."), appeals to convention
+  0.4-0.6: Logical argument with clear reasoning but no empirical data
+  0.6-0.8: Empirical data, quantitative evidence, specific metrics or measurements
+  0.8-1.0: Proven, replicated, or independently verified result with strong data
+For all other event types, leave evidence_strength at the default 0.5.
+
 IMPORTANT RULES:
 - One exchange can produce MULTIPLE events. A single paragraph might introduce a new proposition AND raise a question AND identify a connection.
 - When referencing an existing node, quote or closely paraphrase its text so it can be matched. If you are uncertain which existing node is meant, describe it as specifically as possible.
