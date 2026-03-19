@@ -26,7 +26,7 @@ Cairn is a working proof of concept. These are the boundaries of what it can and
 
 ## Confidence Scoring
 
-**Linear increments.** Support adds +0.1, contradiction subtracts -0.1, capped at 0.1-0.9. This does not account for evidence strength, source credibility, or recency. A weak objection counts the same as a decisive one.
+**No recency weighting.** Confidence updates account for evidence strength (variable deltas based on classifier-assessed strength from 0.0-1.0) but not recency. Old evidence carries the same weight as new evidence.
 
 **No decay.** Old contradictions have the same weight as new ones. In a long-lived graph, stale positions may carry inappropriately low confidence from challenges that were effectively resolved but not formally marked as such.
 
@@ -46,7 +46,7 @@ Cairn is a working proof of concept. These are the boundaries of what it can and
 
 These are directions the architecture supports but that are not yet built:
 
-- **Bayesian confidence updates** with evidence strength and recency weighting
+- **Confidence decay** with recency weighting (evidence strength is now implemented)
 - **Adaptive resolution thresholds** per domain or per node type
 - **Conversation deduplication** via idempotency keys on events
 - **Long-form ingestion** for documents, meeting transcripts, and email threads
