@@ -58,6 +58,8 @@ If you use Claude Code as your AI development tool, cairn integrates via hooks a
 }
 ```
 
+Restart your Claude Code session after adding hooks. Hooks are loaded at session start.
+
 **MCP server** -- exposes the graph as queryable tools for deeper exploration (decision history, trace, disagreement map). Add to `.mcp.json` in your project root:
 ```json
 {
