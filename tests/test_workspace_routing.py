@@ -1,4 +1,4 @@
-"""Integration tests for workspace routing through orchestrator."""
+"""Tests for workspace routing: workspace_id propagation through events, graph, and replay."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import pytest
 
 from cairn.models.events import Event, EventLog, EventType
 from cairn.models.graph_types import GraphNode, IdeaGraph, NodeType
-from cairn.models.workspace import WorkspaceRegistry
 from cairn.pipeline.mutator import apply_event
 
 
@@ -146,54 +145,3 @@ class TestGraphWorkspaceFiltering:
         assert len(summary) == 2
 
 
-class TestOrchestratorWorkspaceWiring:
-    @pytest.mark.skip(reason="cairn.pipeline.orchestrator not yet implemented")
-    async def test_nodes_tagged_with_active_workspace(self):
-        """Nodes created during a mocked turn get the active workspace_id."""
-        from unittest.mock import AsyncMock, MagicMock, patch
-
-        from cairn.models.events import EventLog
-        from cairn.pipeline.orchestrator import Orchestrator
-
-        event_log = EventLog(":memory:")
-        workspace_registry = WorkspaceRegistry(":memory:")
-        graph = IdeaGraph()
-
-        orchestrator = Orchestrator(
-            event_log=event_log,
-            graph=graph,
-            workspace_registry=workspace_registry,
-            embedding_store=None,  # no embeddings for this test
-            active_workspace_id="default",
-        )
-
-        # Mock classify_exchange to return a single NEW_PROPOSITION event
-        classified = MagicMock()
-        classified.event_type = EventType.NEW_PROPOSITION
-        classified.payload = {
-            "text": "Test proposition",
-            "source": "user",
-            "related_node_ids": [],
-        }
-        classified.reasoning = "test"
-
-        # Mock evaluate_next_move
-        eval_output = MagicMock()
-        eval_output.selected_move = MagicMock(value="probe")
-        eval_output.reasoning = "test"
-
-        with (
-            patch("cairn.pipeline.orchestrator.classify_exchange", new=AsyncMock(return_value=[classified])),
-            patch("cairn.pipeline.orchestrator.evaluate_next_move", new=AsyncMock(return_value=eval_output)),
-        ):
-            result = await orchestrator.prepare_turn("I have an idea about testing")
-
-        # Verify node was created with the active workspace_id
-        assert len(result.applied_events) == 1
-        applied_event = result.applied_events[0]
-        assert applied_event.workspace_id == "default"
-
-        # Verify the graph node has workspace_id
-        all_nodes = graph.get_all_nodes()
-        assert len(all_nodes) == 1
-        assert all_nodes[0].workspace_id == "default"
