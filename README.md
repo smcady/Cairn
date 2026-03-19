@@ -15,7 +15,7 @@ Cairn maintains a typed reasoning graph -- propositions, contradictions, refinem
 ## Quick Start
 
 ```bash
-git clone <repo-url> cairn && cd cairn
+git clone https://github.com/smcady/Cairn.git cairn && cd cairn
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -137,6 +137,16 @@ from cairn.integrations.anthropic import AsyncAnthropic
 ```python
 import cairn
 cairn.init(db_path="./my_project.db")  # or set CAIRN_DB env var
+
+# Orient on a topic: returns structured summary of settled/contested/open
+context = await cairn.orient("pricing strategy")
+
+# Query a specific view: current_state, decision_log, disagreement_map, coverage_report
+decisions = cairn.query("decision_log")
+
+# Direct engine access for search
+engine = cairn.get_engine()
+results = await engine.search_nodes("usage-based pricing", k=5)
 ```
 
 For a complete agent loop with automatic orientation before each turn, see [examples/agent_loop.py](examples/agent_loop.py).
@@ -176,11 +186,20 @@ Each user builds their own graph; the database is gitignored. For details on sco
 ## Tests
 
 ```bash
-.venv/bin/python -m pytest tests/ --ignore=tests/test_integration.py --ignore=tests/integration/  # unit (no API keys)
-.venv/bin/python -m pytest tests/test_integration.py                                              # integration (API)
+.venv/bin/python -m pytest tests/ -m "not integration"   # unit tests (no API keys needed)
+.venv/bin/python -m pytest tests/ -m integration          # integration tests (requires API keys)
+.venv/bin/python -m pytest tests/                          # everything
 ```
 
 ---
+
+## Known Limitations
+
+See [docs/limitations.md](docs/limitations.md) for a full list. Key points:
+
+- **Single-user system** -- each person builds their own graph; shared team memory is out of scope for this implementation
+- **Classifier is domain-dependent** -- tested on business strategy conversations; may need tuning for other domains
+- **Confidence scoring is simplified** -- linear increments, no recency weighting or evidence strength
 
 ## Further Reading
 
