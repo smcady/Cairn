@@ -209,7 +209,7 @@ See [docs/limitations.md](docs/limitations.md) for a full list. Key points:
 
 ## Further Reading
 
-- [Beyond Retrieval: A Case for Reasoning Memory](https://shawncady.substack.com/p/beyond-retrieval-a-case-for-reasoning) -- the full argument
+- [Beyond Retrieval: A Case for Reasoning Memory](https://shawncady.substack.com/p/a-case-for-reasoning-memory) -- the full argument
 
 ## Community
 
