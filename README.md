@@ -10,7 +10,7 @@ AI memory stores content -- what was discussed, what was mentioned, what came up
 
 Cairn maintains a typed reasoning graph -- propositions, contradictions, refinements, syntheses, tensions -- with confidence scores and lifecycle status. An LLM with access to this graph knows *the state of your thinking*, not just a flat log of things you said.
 
-![Retrieval memory vs reasoning memory](docs/assets/retrieval-vs-reasoning.svg)
+![Retrieval memory vs reasoning memory](docs/assets/retrieval-vs-reasoning.svg?v=2)
 
 ---
 
