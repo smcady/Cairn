@@ -1,0 +1,16 @@
+{
+  "name": "cairn",
+  "version": "0.1.0",
+  "description": "Reasoning memory for AI agents. Tracks what was decided, contradicted, and left open across sessions.",
+  "author": { "name": "Shawn Cady" },
+  "homepage": "https://github.com/smcady/Cairn",
+  "repository": "https://github.com/smcady/Cairn",
+  "license": "MIT",
+  "keywords": ["memory", "reasoning", "agents", "graph"],
+  "mcpServers": {
+    "cairn": {
+      "command": "bash",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/run-mcp.sh"]
+    }
+  }
+}

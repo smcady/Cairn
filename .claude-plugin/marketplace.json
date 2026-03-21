@@ -1,0 +1,12 @@
+{
+  "name": "cairn-marketplace",
+  "owner": { "name": "Shawn Cady" },
+  "plugins": [
+    {
+      "name": "cairn",
+      "description": "Reasoning memory for AI agents. Tracks what was decided, contradicted, and left open across sessions.",
+      "version": "0.1.0",
+      "source": "."
+    }
+  ]
+}
