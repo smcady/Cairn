@@ -21,7 +21,7 @@ from mcp.server.fastmcp import FastMCP
 
 from cairn.memory.engine import MemoryEngine
 from cairn.models.events import EventLog, EventType
-from cairn.models.graph_types import IdeaGraph, NodeStatus
+from cairn.models.graph_types import NodeStatus
 from cairn.pipeline.mutator import apply_event
 from cairn.pipeline.renderer import ViewType, render_structured_summary
 from cairn.utils.vector_index import VectorIndex
@@ -60,10 +60,8 @@ def _get_engine() -> MemoryEngine:
     global _engine, _last_event_id
     if _engine is None:
         event_log = EventLog(DB_PATH)
-        graph = IdeaGraph()
         vector_index = VectorIndex(DB_PATH)
-        _engine = MemoryEngine(event_log=event_log, graph=graph, vector_index=vector_index)
-        _engine.rebuild_from_log()
+        _engine = MemoryEngine.from_cache(event_log=event_log, vector_index=vector_index)
         last = _engine.event_log.get_recent(1)
         _last_event_id = last[0].id if last else 0
     else:

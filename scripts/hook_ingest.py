@@ -15,17 +15,14 @@ import os
 import sys
 from pathlib import Path
 
-# Project root is one level up from scripts/
-ROOT = Path(__file__).parent.parent
-
 from dotenv import load_dotenv
 
-load_dotenv(ROOT / ".env.local", override=True)
+# Load project .env.local from cwd (hooks run with cwd = project root)
+_env_local = Path.cwd() / ".env.local"
+if _env_local.exists():
+    load_dotenv(_env_local, override=True)
 
-DB_PATH = os.environ.get(
-    "CAIRN_DB",
-    str(ROOT / "cairn.db"),
-)
+DB_PATH = os.environ.get("CAIRN_DB", "cairn.db")
 
 
 def extract_last_turn(transcript_path: str) -> tuple[str, str]:
@@ -76,15 +73,13 @@ def extract_last_turn(transcript_path: str) -> tuple[str, str]:
 async def ingest(content: str) -> None:
     from cairn.memory.engine import MemoryEngine
     from cairn.models.events import EventLog
-    from cairn.models.graph_types import IdeaGraph
     from cairn.utils.vector_index import VectorIndex
 
     event_log = EventLog(DB_PATH)
-    graph = IdeaGraph()
     vector_index = VectorIndex(DB_PATH)
-    engine = MemoryEngine(event_log=event_log, graph=graph, vector_index=vector_index)
-    engine.rebuild_from_log()
+    engine = MemoryEngine.from_cache(event_log=event_log, vector_index=vector_index)
     await engine.ingest(content, source="claude-code-session")
+    engine.save_graph_cache()
 
 
 def main() -> None:

@@ -57,6 +57,38 @@ class MemoryEngine:
         self.resolution_threshold = resolution_threshold
         self.metrics = SessionMetrics()
 
+    @classmethod
+    def from_cache(
+        cls,
+        event_log: EventLog,
+        vector_index: VectorIndex | None = None,
+        **kwargs,
+    ) -> MemoryEngine:
+        """Load engine using graph cache + delta events (fast) with full rebuild fallback."""
+        cached = event_log.load_graph_cache()
+        if cached:
+            graph_dict, last_event_id = cached
+            graph = IdeaGraph.from_dict(graph_dict)
+            new_events = event_log.get_since(last_event_id)
+            if new_events:
+                replay_events(graph, new_events)
+        else:
+            graph = IdeaGraph()
+            engine = cls(event_log=event_log, graph=graph, vector_index=vector_index, **kwargs)
+            engine.rebuild_from_log()
+            return engine
+        engine = cls(event_log=event_log, graph=graph, vector_index=vector_index, **kwargs)
+        all_events = event_log.get_recent(1)
+        if all_events:
+            engine.turn_number = all_events[0].turn_number or 0
+        return engine
+
+    def save_graph_cache(self) -> None:
+        """Persist current graph state to SQLite for fast reload."""
+        last = self.event_log.get_recent(1)
+        last_id = last[0].id if last else 0
+        self.event_log.save_graph_cache(self.graph.to_dict(), last_id)
+
     def rebuild_from_log(self) -> None:
         """Replay all stored events to rebuild graph state."""
         events = self.event_log.get_all()

@@ -279,6 +279,14 @@ class EventLog:
                 parent_hash TEXT NOT NULL DEFAULT ''
             )
         """)
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS graph_cache (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                last_event_id INTEGER NOT NULL,
+                graph_json TEXT NOT NULL,
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+        """)
         # Migrate existing tables that predate hash-linking
         try:
             self._conn.execute("ALTER TABLE events ADD COLUMN parent_hash TEXT NOT NULL DEFAULT ''")
@@ -371,6 +379,28 @@ class EventLog:
                 return False, f"Chain broken at event id={event.id}: expected parent_hash={prev_hash!r}, got {event.parent_hash!r}"
             prev_hash = _compute_event_hash(event)
         return True, f"Chain intact ({len(events)} events)"
+
+    def save_graph_cache(self, graph_dict: dict, last_event_id: int) -> None:
+        """Persist a serialized graph snapshot for fast reload."""
+        self._conn.execute(
+            """INSERT INTO graph_cache (id, last_event_id, graph_json)
+               VALUES (1, ?, ?)
+               ON CONFLICT(id) DO UPDATE SET
+                   last_event_id = excluded.last_event_id,
+                   graph_json = excluded.graph_json,
+                   updated_at = datetime('now')""",
+            (last_event_id, json.dumps(graph_dict)),
+        )
+        self._conn.commit()
+
+    def load_graph_cache(self) -> tuple[dict, int] | None:
+        """Load cached graph snapshot. Returns (graph_dict, last_event_id) or None."""
+        row = self._conn.execute(
+            "SELECT graph_json, last_event_id FROM graph_cache WHERE id = 1"
+        ).fetchone()
+        if row is None:
+            return None
+        return json.loads(row["graph_json"]), row["last_event_id"]
 
     def close(self) -> None:
         self._conn.close()

@@ -183,6 +183,29 @@ class IdeaGraph:
         """Return all nodes belonging to a specific workspace."""
         return [n for n in self.get_all_nodes() if n.workspace_id == workspace_id]
 
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the full graph (nodes + edges) to a JSON-compatible dict."""
+        nodes = {}
+        for nid, data in self._graph.nodes(data=True):
+            nodes[nid] = dict(data)
+        edges = []
+        for u, v, key, data in self._graph.edges(data=True, keys=True):
+            edges.append({"source": u, "target": v, "key": key, **data})
+        return {"nodes": nodes, "edges": edges}
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> IdeaGraph:
+        """Deserialize a graph from a dict produced by to_dict()."""
+        g = cls()
+        for nid, node_data in data.get("nodes", {}).items():
+            g._graph.add_node(nid, **node_data)
+        for edge in data.get("edges", []):
+            src = edge.pop("source")
+            tgt = edge.pop("target")
+            edge.pop("key", None)
+            g._graph.add_edge(src, tgt, **edge)
+        return g
+
     def node_summary_list(self, workspace_id: str | None = None) -> list[dict[str, str]]:
         """Return a lightweight list of node id/type/text for the classifier context.
 
